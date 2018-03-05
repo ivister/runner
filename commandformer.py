@@ -1,7 +1,7 @@
 """
 
 """
-from arguments import RunArguments
+from arguments import RunArguments, LoadArguments, StopArguments
 
 
 class DockerCommand(object):
@@ -15,18 +15,28 @@ class DockerCommand(object):
     def __init__(self, command_type, arguments):
         if command_type == self.Run:
             self.__prefix = "docker run "
+            if not isinstance(arguments, RunArguments):
+                raise AttributeError('Invalid Arguments. Invalid arguments type.')
+            pass
         elif command_type == self.Load:
+            self.__prefix = "docker load "
+            if not isinstance(arguments, LoadArguments):
+                raise AttributeError('Invalid Arguments. Invalid arguments type.')
             pass
         elif command_type == self.Stop:
+            self.__prefix = "docker stop "
+            if not isinstance(arguments, StopArguments):
+                raise AttributeError('Invalid Arguments. Invalid arguments type.')
             pass
+        elif command_type == self.Kill:
+            self.__prefix = "docker kill "
         else:
             raise AttributeError('Invalid Arguments. Unknown command type.')
 
-        if not isinstance(arguments, RunArguments):
-            raise AttributeError('Invalid Arguments. Invalid arguments type.')
+        self.parameters = arguments.__str__()
 
     def __str__(self):
-        return self
+        return self.__prefix + self.parameters
 
     def __repr__(self):
         return self.__str__()
@@ -39,5 +49,6 @@ if __name__ == '__main__':
                         hostname="node00",
                         image_name="test/ib_image:latest",
                         volumes="/etc:/etc /usr:/usr")
-    args = ""
     cm = DockerCommand(command_type=DockerCommand.Run, arguments=args)
+
+    print(cm)
