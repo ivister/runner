@@ -20,15 +20,17 @@ class DockerCommand(object):
         elif command_type == self.Stop:
             pass
         else:
-            raise ValueError('Invalid Arguments. Unknown command type.')
+            raise AttributeError('Invalid Arguments. Unknown command type.')
 
-        if type(arguments) is not type(RunArguments):
-            print(type(arguments))
-            print(type(arguments.RunArguments))
-            raise ValueError('Invalid Arguments. Invalid arguments type.')
+        if not isinstance(arguments, RunArguments):
+            raise AttributeError('Invalid Arguments. Invalid arguments type.')
 
     def __str__(self):
         return self
+
+    def __repr__(self):
+        return self.__str__()
+
 
 if __name__ == '__main__':
     args = RunArguments(name="docker_123123",
@@ -37,5 +39,5 @@ if __name__ == '__main__':
                         hostname="node00",
                         image_name="test/ib_image:latest",
                         volumes="/etc:/etc /usr:/usr")
-
+    args = ""
     cm = DockerCommand(command_type=DockerCommand.Run, arguments=args)
