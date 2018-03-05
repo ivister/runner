@@ -1,27 +1,37 @@
-import os
 import paramiko
+import argparse
+import os
+from commandformer import DockerCommand
+from arguments import LoadArguments
 
-host = '192.168.1.33'
-port = 22
 
-if __name__ == '__main__':
-    command = "ssh 192.168.1.33"
-    second = "docker images"
+def get_filename():
+    parser = argparse.ArgumentParser(description="Get file")
+    parser.add_argument('-f', '--file', dest='filename', action='store', required=True)
+    return parser.parse_args().filename
 
-    client = paramiko.SSHClient()
-    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    client.connect(hostname=host, port=port)
-    stdin, stdout, stderr = client.exec_command(second)
+
+def load_image(client, image_name):
+    args = LoadArguments(image_name)
+    load_command = DockerCommand(command_type=DockerCommand.Load, arguments=args)
+
+    stdin, stdout, stderr = client.exec_command(load_command.__str__())
     data = stdout.read() + stderr.read()
     print(data.decode())
-
-    print("here")
     stdin.flush()
-
     stdout.flush()
     stderr.flush()
-    stdin, stdout, stderr = client.exec_command("docker run -d hello-world")
-    data = stdout.read() + stderr.read()
 
-    print(data.decode())
+
+def configure_machine(hostname, image_name):
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    client.connect(hostname=hostname)
+
+    load_image(client=client, image_name=image_name)
+
     client.close()
+
+if __name__ == '__main__':
+    image_name = "/home/Alex/New/" + "image.tar"
+    configure_machine('manager', image_name)
