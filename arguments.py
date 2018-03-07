@@ -16,7 +16,7 @@ class RunArguments(object):
         main/user_image:latest
     """
 
-    def __init__(self, volumes, device, name, user, hostname, image_name):
+    def __init__(self, volumes, name, user, image_name, hostname=None, device=None):
         self.__volumes = volumes.split(" ")
         self.__device = device
         self.__name = name
@@ -25,11 +25,16 @@ class RunArguments(object):
         self.__image_name = image_name
 
     def __str__(self):
-        res = "--device=" + self.__device +\
-              " --name=" + self.__name +\
-              " --hostname=" + self.__hostname
+        res = ""
+        if self.__device:
+            res += " + --device=" + self.__device
+        if self.__hostname:
+            res += " --hostname=" + self.__hostname
+
+        res += " --name=" + self.__name
         for v in self.__volumes:
             res += " -v " + v
+
         return res + " %s" % self.__image_name
 
 
