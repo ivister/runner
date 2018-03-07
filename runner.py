@@ -23,23 +23,6 @@ def parse_task_file(filename="test_file.txt"):
     return user, image_file, task_id, machines
 
 
-def form_commands(user, image_file):
-    load_command = DockerCommand(command_type=DockerCommand.Load,
-                                 arguments=LoadArguments(image_file)).__str__()
-
-
-# TODO: get image_name from image_file
-    image_name = "newmpich"
-
-    run_command = DockerCommand(command_type=DockerCommand.Run,
-                                arguments=RunArguments(
-                                    volumes="/home:/home",
-                                    name=task_id,
-                                    user=user,
-                                    image_name=image_name
-                                )).__str__()
-
-
 def multiply_image(image_file, machines):
     for mach in machines:
         ssh = paramiko.SSHClient()
@@ -62,8 +45,9 @@ def get_image_name(data):
 
 def load_image(client, image_file):
     args = LoadArguments(image_file)
-    load_command = DockerCommand(command_type=DockerCommand.Load, arguments=args)
-    stdin, stdout, stderr = client.exec_command(load_command.__str__())
+    load_command = DockerCommand(command_type=DockerCommand.Load,
+                                 arguments=args).__str__()
+    stdin, stdout, stderr = client.exec_command(load_command)
     data = stdout.read()
     errors = stderr.read()
 
@@ -76,11 +60,16 @@ def load_image(client, image_file):
     return image_name
 
 
-def run_image(client, image_name, ):
-    args = LoadArguments(image_name)
-    load_command = DockerCommand(command_type=DockerCommand.Load, arguments=args)
+def run_image(client, image_name):
+    run_command = DockerCommand(command_type=DockerCommand.Run,
+                                arguments=RunArguments(
+                                    volumes="/home:/home",
+                                    name=task_id,
+                                    user=user,
+                                    image_name=image_name
+                                )).__str__()
 
-    stdin, stdout, stderr = client.exec_command(load_command.__str__())
+    stdin, stdout, stderr = client.exec_command(run_command)
     data = stdout.read() + stderr.read()
     print(data.decode())
     stdin.flush()
@@ -93,13 +82,18 @@ def configure_machine(hostname, image_file):
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     client.connect(hostname=hostname)
 
+    load_command = DockerCommand(command_type=DockerCommand.Load,
+                                 arguments=LoadArguments(image_file)).__str__()
+
     image_name = load_image(client=client, image_file=image_file)
+
     run_image(client=client, image_name=image_name)
 
     client.close()
 
 if __name__ == '__main__':
     filename = get_filename()
-    user, image, task_id, mach = parse_task_file(filename)
-    print(image)
-    multiply_image(image, mach)
+    user, image, task_id, machines = parse_task_file(filename)
+    multiply_image(image, machines)
+    for mach in machines:
+        configure_machine(hostname=mach, image_file=image)
