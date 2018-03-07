@@ -23,6 +23,18 @@ def parse_task_file(filename="test_file.txt"):
     return user, image_file, task_id, machines
 
 
+def export_task_info(image_name, task_id, machines):
+    with open("task.txt", "w") as json_file:
+        json.dump(
+            {
+                "image": image_name,
+                "container": task_id,
+                "machines": " ".join(machines)
+            },
+            json_file
+        )
+
+
 def multiply_image(image_file, machines):
     for mach in machines:
         ssh = paramiko.SSHClient()
@@ -57,17 +69,21 @@ def load_image(client, image_file):
     stdin.flush()
     stdout.flush()
     stderr.flush()
+
+    rm_command = "rm -rf " + image_file
+    _, _, stderr = client.exec_command(rm_command)
     return image_name
 
 
-def run_image(client, image_name):
-    run_command = DockerCommand(command_type=DockerCommand.Run,
-                                arguments=RunArguments(
+def run_image(client, image_name, task_id):
+    args = RunArguments(
                                     volumes="/home:/home",
                                     name=task_id,
                                     user=user,
                                     image_name=image_name
-                                )).__str__()
+                                )
+    run_command = DockerCommand(command_type=DockerCommand.Run,
+                                arguments=args).__str__()
 
     stdin, stdout, stderr = client.exec_command(run_command)
     data = stdout.read() + stderr.read()
@@ -87,13 +103,17 @@ def configure_machine(hostname, image_file):
 
     image_name = load_image(client=client, image_file=image_file)
 
-    run_image(client=client, image_name=image_name)
-
+    run_image(client=client, image_name=image_name, task_id=task_id)
     client.close()
+
+    return image_name
 
 if __name__ == '__main__':
     filename = get_filename()
     user, image, task_id, machines = parse_task_file(filename)
     multiply_image(image, machines)
+    image_name = ""
     for mach in machines:
-        configure_machine(hostname=mach, image_file=image)
+        image_name = configure_machine(hostname=mach, image_file=image)
+
+    export_task_info(image_name=image_name, task_id=task_id, machines=machines)

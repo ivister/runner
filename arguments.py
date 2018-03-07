@@ -24,6 +24,9 @@ class RunArguments(object):
         self.__hostname = hostname
         self.__image_name = image_name
 
+    def get_cont_name(self):
+        return self.__name
+
     def __str__(self):
         res = ""
         if self.__device:
