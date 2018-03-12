@@ -23,11 +23,10 @@ def parse_task_file(filename="test_file.txt"):
     return user, image_file, task_id, machines
 
 
-def export_task_info(image_name, task_id, machines):
+def export_task_info(task_id, machines):
     with open("task.txt", "w") as json_file:
         json.dump(
             {
-                "image": image_name,
                 "container": task_id,
                 "machines": " ".join(machines)
             },
@@ -52,7 +51,7 @@ def get_image_name(data):
     """
     """Input example b'Image Loaded: newmpich:latest' """
     tmp = data.decode().split(" ")
-    return tmp[-1]
+    return tmp[-1][:-1]
 
 
 def load_image(client, image_file):
@@ -86,8 +85,6 @@ def run_image(client, image_name, task_id):
                                 arguments=args).__str__()
 
     stdin, stdout, stderr = client.exec_command(run_command)
-    data = stdout.read() + stderr.read()
-    print(data.decode())
     stdin.flush()
     stdout.flush()
     stderr.flush()
@@ -116,4 +113,4 @@ if __name__ == '__main__':
     for mach in machines:
         image_name = configure_machine(hostname=mach, image_file=image)
 
-    export_task_info(image_name=image_name, task_id=task_id, machines=machines)
+    export_task_info(task_id=task_id, machines=machines)

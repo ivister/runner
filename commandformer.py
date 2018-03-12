@@ -11,6 +11,7 @@ class DockerCommand(object):
     Load = 2
     Stop = 9
     Kill = 10
+    Ps = 11
 
     def __init__(self, command_type, arguments):
         if command_type == self.Run:
@@ -52,3 +53,5 @@ if __name__ == '__main__':
     cm = DockerCommand(command_type=DockerCommand.Run, arguments=args)
 
     print(cm)
+
+# docker ps --filter=name=docker_NUMTASK --format='{{.Image}}'
