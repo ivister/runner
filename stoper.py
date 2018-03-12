@@ -12,7 +12,7 @@ def get_filename():
     return parser.parse_args("-f task.txt".split()).filename
 
 
-def parse_stop_file(filename="test_file.txt"):
+def parse_stop_file(filename="task.txt"):
     """
     :param filename:
     :return:
@@ -37,27 +37,21 @@ def clear_machine(hostname, cont_name):
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     client.connect(hostname=hostname)
 
-    stdin, stdout, stderr = client.exec_command(img_from_cont(cont_name=cont_name))
-    image_name = stdout.read()
-    stdin.flush()
+    _, stdout, stderr = client.exec_command(img_from_cont(cont_name=cont_name))
+    image_name = stdout.read().decode()
     stdout.flush()
-    stderr.flush()
 
-    stdin, stdout, stderr = client.exec_command("docker stop %s" % cont_name)
+    _, stdout, stderr = client.exec_command("docker stop %s" % cont_name)
     cont_id = stdout.read().decode()
-    stdin.flush()
     stdout.flush()
-    stderr.flush()
 
-    stdin, stdout, stderr = client.exec_command("docker rmi %s" % image_name)
-    stdin.flush()
-    stdout.flush()
-    stderr.flush()
+    _, stdout, stderr = client.exec_command("docker rm %s" % cont_id)
+    check = stdout.read().decode()
 
-    stdin, stdout, stderr = client.exec_command("docker container prune" % image_name)
-    stdin.flush()
-    stdout.flush()
-    stderr.flush()
+    _, _, stderr = client.exec_command("docker rmi %s" % image_name)
+
+    errors = stderr.read().decode()
+    print(errors)
 
     client.close()
 
