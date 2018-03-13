@@ -9,10 +9,14 @@ from arguments import LoadArguments, RunArguments
 def get_filename():
     parser = argparse.ArgumentParser(description="Get file")
     parser.add_argument('-f', '--file', dest='filename', action='store', required=True)
-    return parser.parse_args("-f test_file.txt".split()).filename
+    return parser.parse_args().filename
 
 
-def parse_task_file(filename="test_file.txt"):
+def parse_task_file(filename):
+    """
+    :param filename:
+    :return:
+    """
     with open(filename) as json_file:
         data = json.load(json_file)
     user = data["user"]
@@ -40,8 +44,11 @@ def multiply_image(image_file, machines):
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         ssh.connect(mach)
 
-        with SCPClient(ssh.get_transport()) as scp:
-            scp.put(image_file)
+        ftp = ssh.open_sftp()
+        ftp.put(image_file, image_file)
+        ftp.close()
+        # with SCPClient(ssh.get_transport()) as scp:
+        #    scp.put(image_file)
 
 
 def get_image_name(data):

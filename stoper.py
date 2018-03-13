@@ -9,10 +9,10 @@ def get_filename():
     """
     parser = argparse.ArgumentParser(description="Get file")
     parser.add_argument('-f', '--file', dest='filename', action='store', required=True)
-    return parser.parse_args("-f task.txt".split()).filename
+    return parser.parse_args().filename
 
 
-def parse_stop_file(filename="task.txt"):
+def parse_stop_file(filename):
     """
     :param filename:
     :return:
