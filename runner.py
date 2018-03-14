@@ -5,6 +5,7 @@ import argparse
 import paramiko
 from network import EthernetNetwork
 from container import Container
+from default import DEFAULT_VOLUMES
 
 
 def get_filename():
@@ -129,7 +130,7 @@ def run_image(client, image_name, task_id, user):
     :param user:
     :return:
     """
-    container = Container(volumes="/home:/home",
+    container = Container(volumes=DEFAULT_VOLUMES,
                           detach=True,
                           name=task_id,
                           user=user,

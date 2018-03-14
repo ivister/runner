@@ -40,9 +40,7 @@ def clean_machine(hostname, cont_name):
     client.connect(hostname=hostname)
 
     _, stdout, stderr = client.exec_command(Container.img_from_cont(cont_name))
-    print("1: %s" % Container.img_from_cont(cont_name))
     image_name = stdout.read().decode()
-    print("2: %s" % image_name)
     stdout.flush()
 
     _, stdout, stderr = client.exec_command(Container.stop(cont_name))
