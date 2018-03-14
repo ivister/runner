@@ -1,6 +1,10 @@
-import paramiko
-import argparse
+"""
+"""
 import json
+import argparse
+import paramiko
+from container import Container
+from network import EthernetNetwork
 
 
 def get_filename():
@@ -8,7 +12,8 @@ def get_filename():
     :return:
     """
     parser = argparse.ArgumentParser(description="Get file")
-    parser.add_argument('-f', '--file', dest='filename', action='store', required=True)
+    parser.add_argument('-f', '--file', dest='filename',
+                        action='store', required=True)
     return parser.parse_args().filename
 
 
@@ -24,31 +29,33 @@ def parse_stop_file(filename):
     return cont_name, machines
 
 
-def img_from_cont(cont_name):
+def clean_machine(hostname, cont_name):
     """
+    :param hostname:
     :param cont_name:
     :return:
     """
-    return "docker ps --filter=name=%s --format='{{.Image}}'" % cont_name
-
-
-def clear_machine(hostname, cont_name):
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     client.connect(hostname=hostname)
 
-    _, stdout, stderr = client.exec_command(img_from_cont(cont_name=cont_name))
+    _, stdout, stderr = client.exec_command(Container.img_from_cont(cont_name))
+    print("1: %s" % Container.img_from_cont(cont_name))
     image_name = stdout.read().decode()
+    print("2: %s" % image_name)
     stdout.flush()
 
-    _, stdout, stderr = client.exec_command("docker stop %s" % cont_name)
-    cont_id = stdout.read().decode()
+    _, stdout, stderr = client.exec_command(Container.stop(cont_name))
+    _ = stdout.read().decode()
     stdout.flush()
 
-    _, stdout, stderr = client.exec_command("docker rm %s" % cont_id)
-    check = stdout.read().decode()
+    _, stdout, stderr = client.exec_command(Container.remove(cont_name))
+    _ = stdout.read().decode()
 
-    _, _, stderr = client.exec_command("docker rmi %s" % image_name)
+    _, _, stderr = client.exec_command(Container.remove_image(image_name))
+
+    print(stderr.read())
+    _, _, stderr = client.exec_command(EthernetNetwork.remove(cont_name))
 
     errors = stderr.read().decode()
     print(errors)
@@ -56,9 +63,11 @@ def clear_machine(hostname, cont_name):
     client.close()
 
 
-if __name__ == '__main__':
+def main():
     fn = get_filename()
     cnt, mach = parse_stop_file(fn)
     for m in mach:
-        clear_machine(m, cnt)
-    pass
+        clean_machine(m, cnt)
+
+if __name__ == '__main__':
+    main()
