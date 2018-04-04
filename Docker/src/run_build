@@ -1,2 +1,2 @@
-#!/bin/zsh
+#!/bin/bash
 docker build -t my_cont .
