@@ -16,8 +16,9 @@ RUN yum install -y libibverbs && \
 
 EXPOSE 22
 
-#RUN useradd
+RUN useradd -d /home/ivan -g users -u 1001 ivan
+VOLUME /home:/home
 
-RUN ssh-keygen -t rsa -b 4096 -f /etc/ssh/ssh_host_rsa_key
+#RUN ssh-keygen -t rsa -b 4096 -f /etc/ssh/ssh_host_rsa_key
 CMD ["/usr/sbin/sshd", "-D"]
 
