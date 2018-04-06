@@ -2,8 +2,7 @@
 docker run -d \
     --rm \
     --user=1001:101 \
-    --device=/dev/infiniband:/dev/infiniband \
     --volume=/home:/home \
     --hostname=my_cont \
     -P \
-    ivister/mvapich
+    my_cont
