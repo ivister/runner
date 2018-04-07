@@ -1,8 +1,9 @@
 #!/bin/bash
 docker run -d \
     --rm \
-    --user=1001:101 \
+    --user=1001:100 \
+    --security-opt=no-new-privileges \
     --volume=/home:/home \
     --hostname=my_cont \
     -P \
-    my_cont
+    ivister/mvapich

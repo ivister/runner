@@ -1,2 +1,2 @@
 #!/bin/bash
-docker build -t my_cont .
+docker build -t ivister/mvapich .
