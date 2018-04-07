@@ -63,9 +63,6 @@ def multiply_image(image_file, machines, task_id):
         ssh.connect(mach)
 
         ftp = ssh.open_sftp()
-        remote_file = get_remote_name(image_file)
-        print(remote_file)
-        print(image_file)
         ftp.put(image_file, get_remote_name(task_id))  # TODO: change destination (use uniqu)  || COMPLETE!
         ftp.close()
 
@@ -115,7 +112,7 @@ def create_network(client, eth_net):
     :return:
     """
     stdin, stdout, stderr = client.exec_command(eth_net.create_command)
-    print(eth_net.create_command)
+    # print(eth_net.create_command)
     data = stdout.read()
     _ = stderr.read()
 
@@ -147,7 +144,7 @@ def run_image(client, image_name, task_id, user, main_hostname):
 
     # TODO: DEBUG
 
-    print(run_command)
+    # print(run_command)
 
     stdin, stdout, stderr = client.exec_command(run_command)
     stdin.flush()
@@ -155,7 +152,7 @@ def run_image(client, image_name, task_id, user, main_hostname):
     stderr.flush()
 
 
-def configure_machine(hostname, image_file, task_id, user, swarm_token):
+def configure_machine(hostname, task_id, user, swarm_token):
     """
     :param hostname:
     :param image_file:
@@ -191,8 +188,8 @@ def main():
 
     swarm_token = None
     for mach in machines:
-        configure_machine(hostname=mach, image_file=image,
-                          task_id=task_id, user=user, swarm_token=swarm_token)
+        configure_machine(hostname=mach, task_id=task_id,
+                          user=user, swarm_token=swarm_token)
 
     export_task_info(task_id=task_id, machines=machines)
 

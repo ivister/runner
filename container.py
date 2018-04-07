@@ -49,6 +49,7 @@ class Container(object):
 
         command += " %s" % self.__type
         command += volumes_to_string(self.__kwargs["volumes"])
+        command += " -P "
         self.__kwargs.pop("volumes")
         command += dict_to_string(self.__kwargs)
 
