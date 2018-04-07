@@ -2,8 +2,10 @@
 docker run -d \
     --rm \
     --user=1001:100 \
+    --net=my_net \
     --security-opt=no-new-privileges \
     --volume=/home:/home \
-    --hostname=my_cont \
+    --name=my_cont \
+    --hostname=test.my_net \
     -P \
     ivister/mvapich
