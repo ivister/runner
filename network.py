@@ -40,6 +40,7 @@ class EthernetNetwork(object):
         command = "docker network create %s" % dict_to_string(self.__kwargs)
 
         if hasattr(self, "__is_attachable"):
+            print("HAS")
             command += " %s" % self.__attachable_flag
         command += " %s" % self.__name
         return command

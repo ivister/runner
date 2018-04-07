@@ -51,7 +51,7 @@ def export_task_info(task_id, machines):
         )
 
 
-def multiply_image(image_file, machines):
+def multiply_image(image_file, machines, task_id):
     """
     :param image_file:
     :param machines:
@@ -66,7 +66,7 @@ def multiply_image(image_file, machines):
         remote_file = get_remote_name(image_file)
         print(remote_file)
         print(image_file)
-        ftp.put(image_file, "image.tar")  # TODO: change!!! paths
+        ftp.put(image_file, get_remote_name(task_id))  # TODO: change destination (use uniqu)  || COMPLETE!
         ftp.close()
 
 
@@ -115,6 +115,7 @@ def create_network(client, eth_net):
     :return:
     """
     stdin, stdout, stderr = client.exec_command(eth_net.create_command)
+    print(eth_net.create_command)
     data = stdout.read()
     _ = stderr.read()
 
@@ -127,7 +128,7 @@ def create_network(client, eth_net):
     return net_id
 
 
-def run_image(client, image_name, task_id, user):
+def run_image(client, image_name, task_id, user, main_hostname):
     """
     :param client:
     :param image_name:
@@ -139,7 +140,7 @@ def run_image(client, image_name, task_id, user):
                           detach=True,
                           name=task_id,
                           net=task_id,
-                          hostname="%s.%s" % ("", task_id),
+                          hostname="%s.%s" % (main_hostname, task_id),
                           user=user,
                           image=image_name)
     run_command = container.run_command
@@ -175,9 +176,9 @@ def configure_machine(hostname, image_file, task_id, user, swarm_token):
                               driver="overlay", subnet="10.0.0.0/24")
 
     create_network(client, network)
-    image_name = load_image(client=client, image_file=image_file)
+    image_name = load_image(client=client, image_file=get_remote_name(task_id))
 
-    run_image(client=client, image_name=image_name, task_id=task_id, user=user)
+    run_image(client=client, image_name=image_name, task_id=task_id, user=user, main_hostname=hostname)
     client.close()
 
     return swarm_token
@@ -186,7 +187,7 @@ def configure_machine(hostname, image_file, task_id, user, swarm_token):
 def main():
     filename = get_filename()
     user, image, task_id, machines = parse_task_file(filename)
-    multiply_image(image, machines)
+    multiply_image(image, machines, task_id)
 
     swarm_token = None
     for mach in machines:
