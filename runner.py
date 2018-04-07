@@ -5,7 +5,8 @@ import argparse
 import paramiko
 from network import EthernetNetwork
 from container import Container
-from default import DEFAULT_VOLUMES
+from default import DEFAULT_VOLUMES, DEFAULT_ADAPTER
+from swarm import Swarm
 
 
 def get_filename():
@@ -147,7 +148,7 @@ def run_image(client, image_name, task_id, user):
     stderr.flush()
 
 
-def configure_machine(hostname, image_file, task_id, user):
+def configure_machine(hostname, image_file, task_id, user, swarm_token=None):
     """
     :param hostname:
     :param image_file:
@@ -158,6 +159,11 @@ def configure_machine(hostname, image_file, task_id, user):
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     client.connect(hostname=hostname)
+
+    if no swarm_token:
+        Swarm.init_swarm(client)
+    else:
+        Swarm.connect_to_swarm(client, swarm_token)
 
     network = EthernetNetwork(attachable=True, name=task_id,
                               driver="overlay", subnet="192.168.1.0/24")
