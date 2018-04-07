@@ -7,6 +7,7 @@ from network import EthernetNetwork
 from container import Container
 from default import DEFAULT_VOLUMES
 from swarm import Swarm
+from functions import get_remote_name
 
 
 def get_filename():
@@ -62,7 +63,10 @@ def multiply_image(image_file, machines):
         ssh.connect(mach)
 
         ftp = ssh.open_sftp()
-        ftp.put(image_file, image_file)
+        remote_file = get_remote_name(image_file)
+        print(remote_file)
+        print(image_file)
+        ftp.put(image_file, "image.tar")  # TODO: change!!! paths
         ftp.close()
 
 
@@ -134,6 +138,8 @@ def run_image(client, image_name, task_id, user):
     container = Container(volumes=DEFAULT_VOLUMES,
                           detach=True,
                           name=task_id,
+                          net=task_id,
+                          hostname="%s.%s" % ("", task_id),
                           user=user,
                           image=image_name)
     run_command = container.run_command
@@ -148,7 +154,7 @@ def run_image(client, image_name, task_id, user):
     stderr.flush()
 
 
-def configure_machine(hostname, image_file, task_id, user, swarm_token=None):
+def configure_machine(hostname, image_file, task_id, user, swarm_token):
     """
     :param hostname:
     :param image_file:
@@ -174,7 +180,7 @@ def configure_machine(hostname, image_file, task_id, user, swarm_token=None):
     run_image(client=client, image_name=image_name, task_id=task_id, user=user)
     client.close()
 
-    return network.get_name()
+    return swarm_token
 
 
 def main():
@@ -182,9 +188,10 @@ def main():
     user, image, task_id, machines = parse_task_file(filename)
     multiply_image(image, machines)
 
+    swarm_token = None
     for mach in machines:
         configure_machine(hostname=mach, image_file=image,
-                          task_id=task_id, user=user)
+                          task_id=task_id, user=user, swarm_token=swarm_token)
 
     export_task_info(task_id=task_id, machines=machines)
 

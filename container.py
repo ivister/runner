@@ -11,6 +11,7 @@ class Container(object):
     __available_args = ["volumes",
                         "devices",
                         "hostname",
+                        "net",
                         "user",
                         "image",
                         "detach",

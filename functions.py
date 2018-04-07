@@ -1,3 +1,6 @@
+def get_remote_name(name):
+    prefix = "~/"
+    return prefix + name.split("/")[-1]
 
 
 def dict_to_string(in_dict):
