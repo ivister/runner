@@ -2,6 +2,7 @@
 """
 from default import DEFAULT_ADAPTER
 
+
 class Swarm(object):
     """
     """
@@ -10,7 +11,7 @@ class Swarm(object):
 
     @staticmethod
     def init_swarm(ssh_client, eth_adapter=DEFAULT_ADAPTER):
-        join_command = "docker swarm init --advertise-addr=%s"
+        join_command = "docker swarm init --advertise-addr=%s" % eth_adapter
         _, stdout, stderr = ssh_client.exec_command(join_command)
         token = Swarm.get_token_from_out(stdout.read())
         stdout.flush()
@@ -25,8 +26,7 @@ class Swarm(object):
 
     @staticmethod
     def get_token_from_out(encoded_out):
-        data = decoded_out.decode()
+        data = encoded_out.decode()
         sentences = data.split("\n")
         token = sentences[4].lstrip()
         return token
-

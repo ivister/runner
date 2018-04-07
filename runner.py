@@ -5,7 +5,7 @@ import argparse
 import paramiko
 from network import EthernetNetwork
 from container import Container
-from default import DEFAULT_VOLUMES, DEFAULT_ADAPTER
+from default import DEFAULT_VOLUMES
 from swarm import Swarm
 
 
@@ -160,13 +160,13 @@ def configure_machine(hostname, image_file, task_id, user, swarm_token=None):
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     client.connect(hostname=hostname)
 
-    if no swarm_token:
+    if not swarm_token:
         Swarm.init_swarm(client)
     else:
         Swarm.connect_to_swarm(client, swarm_token)
 
     network = EthernetNetwork(attachable=True, name=task_id,
-                              driver="overlay", subnet="192.168.1.0/24")
+                              driver="overlay", subnet="10.0.0.0/24")
 
     create_network(client, network)
     image_name = load_image(client=client, image_file=image_file)
@@ -187,6 +187,7 @@ def main():
                           task_id=task_id, user=user)
 
     export_task_info(task_id=task_id, machines=machines)
+
 
 if __name__ == '__main__':
     main()
