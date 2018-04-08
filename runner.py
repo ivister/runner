@@ -9,6 +9,7 @@ from default import DEFAULT_VOLUMES
 from swarm import Swarm
 from functions import get_remote_name
 from functions import dot_to_underscore
+from functions import add_dot_txt
 
 
 def get_filename():
@@ -42,7 +43,7 @@ def export_task_info(task_id, machines):
     :param machines:
     :return:
     """
-    with open(task_id, "w") as json_file:
+    with open(add_dot_txt(task_id), "w") as json_file:
         json.dump(
             {
                 "container": task_id,
