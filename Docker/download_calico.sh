@@ -8,3 +8,5 @@ sudo systemctl start etcd
 
 docker pull calico/node:v0.22.0
 docker pull calico/node-libnetwork:v0.9.0
+
+sudo ./calicoctl node --libnetwork
