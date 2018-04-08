@@ -1,10 +1,13 @@
 """
 """
 import json
+import os
 import argparse
 import paramiko
 from container import Container
 from network import EthernetNetwork
+from swarm import Swarm
+from functions import dot_to_underscore
 
 
 def get_filename():
@@ -24,48 +27,55 @@ def parse_stop_file(filename):
     """
     with open(filename) as json_file:
         data = json.load(json_file)
-    cont_name = data["container"]
+    task_id = data["task_id"]
     machines = data["machines"].split(" ")
-    return cont_name, machines
+    return task_id, machines
 
 
-def clean_machine(hostname, cont_name):
+def clean_machine(hostname, or_task_id):
     """
     :param hostname:
     :param cont_name:
     :return:
     """
-    client = paramiko.SSHClient()
-    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    client.connect(hostname=hostname)
 
-    _, stdout, stderr = client.exec_command(Container.img_from_cont(cont_name))
+    task_id = dot_to_underscore(or_task_id)
+    cont_name = task_id
+
+    ssh_client = paramiko.SSHClient()
+    ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh_client.connect(hostname=hostname)
+
+    _, stdout, stderr = ssh_client.exec_command(Container.img_from_cont(cont_name))
     image_name = stdout.read().decode()
     stdout.flush()
 
-    _, stdout, stderr = client.exec_command(Container.stop(cont_name))
+    _, stdout, stderr = ssh_client.exec_command(Container.stop(cont_name))
     _ = stdout.read().decode()
     stdout.flush()
 
-    _, stdout, stderr = client.exec_command(Container.remove(cont_name))
+    _, stdout, stderr = ssh_client.exec_command(Container.remove(cont_name))
     _ = stdout.read().decode()
 
-    _, _, stderr = client.exec_command(Container.remove_image(image_name))
+    _, _, stderr = ssh_client.exec_command(Container.remove_image(image_name))
 
-    print(stderr.read())
-    _, _, stderr = client.exec_command(EthernetNetwork.remove(cont_name))
+    _, _, stderr = ssh_client.exec_command(EthernetNetwork.remove(task_id))
 
-    errors = stderr.read().decode()
-    print(errors)
+    _, _, stderr = ssh_client.exec_command(Swarm.get_leave_command())
 
-    client.close()
+    _ = stderr.read().decode()
+
+    ssh_client.close()
 
 
 def main():
     fn = get_filename()
-    cnt, mach = parse_stop_file(fn)
-    for m in mach:
-        clean_machine(m, cnt)
+    task_id, machines = parse_stop_file(fn)
+    for mach in machines:
+        clean_machine(mach, task_id)
+
+    os.remove(fn)
+
 
 if __name__ == '__main__':
     main()

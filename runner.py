@@ -46,7 +46,7 @@ def export_task_info(task_id, machines):
     with open(add_dot_txt(task_id), "w") as json_file:
         json.dump(
             {
-                "container": task_id,
+                "task_id": task_id,
                 "machines": " ".join(machines)
             },
             json_file
