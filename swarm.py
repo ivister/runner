@@ -30,3 +30,11 @@ class Swarm(object):
         sentences = data.split("\n")
         token = sentences[4].lstrip()
         return token
+
+    @staticmethod
+    def get_leave_command():
+        return "docker swarm leave --force"
+
+
+if __name__ == '__main__':
+    print(Swarm.get_leave_command())
