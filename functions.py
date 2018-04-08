@@ -17,3 +17,15 @@ def volumes_to_string(vol_string):
     for vol in tmp:
         result += " --volume %s" % vol
     return result
+
+
+def dot_to_underscore(dot_text):
+    return "_".join(dot_text.split("."))
+
+
+def add_dot_txt(filename):
+    return filename + ".txt"
+
+
+if __name__ == '__main__':
+    print(dot_to_underscore("mpi.ivan.docker.net.33"))

@@ -8,6 +8,7 @@ from container import Container
 from default import DEFAULT_VOLUMES
 from swarm import Swarm
 from functions import get_remote_name
+from functions import dot_to_underscore
 
 
 def get_filename():
@@ -63,7 +64,7 @@ def multiply_image(image_file, machines, task_id):
         ssh.connect(mach)
 
         ftp = ssh.open_sftp()
-        ftp.put(image_file, get_remote_name(task_id))  # TODO: change destination (use uniqu)  || COMPLETE!
+        ftp.put(image_file, get_remote_name(task_id))
         ftp.close()
 
 
@@ -183,7 +184,8 @@ def configure_machine(hostname, task_id, user, swarm_token):
 
 def main():
     filename = get_filename()
-    user, image, task_id, machines = parse_task_file(filename)
+    user, image, or_task_id, machines = parse_task_file(filename)
+    task_id = dot_to_underscore(or_task_id)
     multiply_image(image, machines, task_id)
 
     swarm_token = None
@@ -191,7 +193,7 @@ def main():
         configure_machine(hostname=mach, task_id=task_id,
                           user=user, swarm_token=swarm_token)
 
-    export_task_info(task_id=task_id, machines=machines)
+    export_task_info(task_id=or_task_id, machines=machines)
 
 
 if __name__ == '__main__':
