@@ -41,7 +41,7 @@ def export_task_info(task_id, machines):
     :param machines:
     :return:
     """
-    with open("task.txt", "w") as json_file:
+    with open(task_id, "w") as json_file:
         json.dump(
             {
                 "container": task_id,
