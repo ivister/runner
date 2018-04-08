@@ -172,7 +172,7 @@ def configure_machine(hostname, task_id, user, swarm_token):
         Swarm.connect_to_swarm(client, swarm_token)
 
     network = EthernetNetwork(attachable=True, name=task_id,
-                              driver="overlay", subnet="10.0.0.0/8")
+                              driver="calico", ipam_driver="calico")
 
     create_network(client, network)
     image_name = load_image(client=client, image_file=get_remote_name(task_id))
