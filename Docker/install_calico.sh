@@ -18,3 +18,6 @@ docker pull calico/node:v0.22.0
 docker pull calico/node-libnetwork:v0.9.0
 
 calicoctl node --libnetwork
+
+#calicoctl pool add 10.0.0.0/8
+#docker network create --driver calico --ipam-driver calico my_net
