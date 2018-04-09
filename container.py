@@ -17,10 +17,13 @@ class Container(object):
                         "detach",
                         "interactive",
                         "cpus",
+                        "enable_ib",
                         "name"]
     __detach_flag = '--detach'
     __interactive_flag = '-i'
     __security_flag = '--security-opt=no-new-privileges'
+    # TODO: check ib_devices
+    __ib_devices = "--device=/dev/infiniband/uverbs0 --device/dev/infiniband/rdma_cm "
 
     def __init__(self, **kwargs):
 
@@ -32,6 +35,9 @@ class Container(object):
         elif "interactive" in kwargs.keys():
             kwargs.pop("interactive")
             self.__type = self.__interactive_flag
+        if "enable_ib" in kwargs.keys():
+            self.__ib = True
+            kwargs.pop("enable_ib")
 
         for key in kwargs.keys():
             if key not in self.__available_args:
@@ -47,6 +53,9 @@ class Container(object):
         """
         command = "docker run"
         command += " %s" % self.__security_flag
+
+        if self.__ib:
+            command += self.__ib_devices
 
         command += " %s" % self.__type
         command += volumes_to_string(self.__kwargs["volumes"])
