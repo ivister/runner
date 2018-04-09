@@ -1,4 +1,5 @@
 """"""
 
 DEFAULT_VOLUMES = "/home:/home"
-DEFAULT_ADAPTER = "ens33"
+DEFAULT_ADAPTER = "ens37"
+DEFAULT_CPU_PER_NODE = 2
