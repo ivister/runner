@@ -41,7 +41,7 @@ def parse_task_file(filename):
             enable_ib = True
         else:
             enable_ib = False
-    except Exception:
+    except json.JSONDecodeError:
         enable_ib = False
 
     return user, image_file, task_id, machines, cpu_count, enable_ib
