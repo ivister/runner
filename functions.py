@@ -9,10 +9,12 @@ def get_remote_name(task_id):
 
 
 def dict_to_string(in_dict):
-
     result = ""
     for key in in_dict.keys():
-        result += ' --%s=%s' % (key, in_dict[key])
+        if "_" in key:
+            result += ' --%s=%s' % ("-".join(key.split("_")), in_dict[key])
+        else:
+            result += ' --%s=%s' % (key, in_dict[key])
     return result
 
 
@@ -20,7 +22,7 @@ def volumes_to_string(vol_string):
     tmp = vol_string.split(" ")
     result = ""
     for vol in tmp:
-        result += " --volume %s" % vol
+        result += " --volume=%s" % vol
     return result
 
 
