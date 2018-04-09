@@ -16,6 +16,7 @@ class Container(object):
                         "image",
                         "detach",
                         "interactive",
+                        "cpus",
                         "name"]
     __detach_flag = '--detach'
     __interactive_flag = '-i'
