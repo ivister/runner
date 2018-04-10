@@ -12,6 +12,10 @@ from functions import get_remote_name
 from functions import dot_to_underscore
 from functions import add_dot_txt
 from functions import calculate_cpus
+from functions import add_hostfile_to_command
+from functions import get_username_from_pair
+from functions import move_hostfile_to_userhome
+from executor import run_user_command
 
 
 def get_filename():
@@ -36,6 +40,8 @@ def parse_task_file(filename):
     task_id = data["task_id"]
     cpu_count = int(data["cpu_count"])
     machines = data["machines"].split(" ")
+    command = data["user_command"]
+
     try:
         if data["enable_infiniband"] == "yes":
             enable_ib = True
@@ -44,7 +50,7 @@ def parse_task_file(filename):
     except json.JSONDecodeError:
         enable_ib = False
 
-    return user, image_file, task_id, machines, cpu_count, enable_ib
+    return user, image_file, task_id, machines, cpu_count, enable_ib, command
 
 
 def export_task_info(task_id, machines):
@@ -185,7 +191,7 @@ def configure_machine(hostname, task_id, user, cpu_count, enable_ib=False, netwo
 
 def main():
     filename = get_filename()
-    user, image, or_task_id, machines, cpu_count, enable_ib = parse_task_file(filename)
+    user, image, or_task_id, machines, cpu_count, enable_ib, user_command = parse_task_file(filename)
     task_id = dot_to_underscore(or_task_id)
     multiply_image(image, machines, task_id)
 
@@ -203,6 +209,11 @@ def main():
                           user=user, cpu_count=cpu, enable_ib=enable_ib, network_need=network)
 
     export_task_info(task_id=or_task_id, machines=machines)
+
+    # move_hostfile_to_userhome(machines=machines, task_id=task_id,
+    #                           user=get_username_from_pair(user), filename=add_dot_txt(task_id))
+    # user_command = add_hostfile_to_command(user_command, hostfile_name=add_dot_txt(task_id))
+    # run_user_command(task_id=task_id, host=machines[0], command=user_command)
 
 
 if __name__ == '__main__':
