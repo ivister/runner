@@ -38,6 +38,8 @@ class Container(object):
         if "enable_ib" in kwargs.keys():
             self.__ib = True
             kwargs.pop("enable_ib")
+        else:
+            self.__ib = False
 
         for key in kwargs.keys():
             if key not in self.__available_args:
@@ -101,6 +103,12 @@ class Container(object):
         return "docker stop %s" % name
 
     @staticmethod
+    def exec_command(container_name, command):
+        pattern = """docker exec -d %s sh -c "%s" """
+        return pattern % (container_name, command)
+
+
+    @staticmethod
     def img_from_cont(cont_name):
         """
         :param cont_name:
@@ -114,7 +122,10 @@ class Container(object):
 
 
 if __name__ == '__main__':
-    c = Container(image="newmpich:latest", name="name", volumes="/usr:/usr /bin:/bin", hostname="host", user="3333:1010", detach=True)
+    c = Container(image="newmpich:latest", name="name", volumes="/usr:/usr /bin:/bin",
+                  hostname="host", user="3333:1010", detach=True)
     print(c.run_command)
     print(c.remove_command)
     print(Container.remove("name"))
+
+    print(Container.exec_command("mpi_ivan_133", "mpirun -np 3 --hostfile hst ./program -a a1 -b b1"))
