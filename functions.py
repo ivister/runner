@@ -1,7 +1,9 @@
 """
 """
 from default import DEFAULT_CPU_PER_NODE
-from os import system
+import shutil
+import pwd
+import os
 
 
 def get_remote_name(task_id):
@@ -69,21 +71,31 @@ def write_hosts_to_file(hosts_line, filename):
     return filename
 
 
-def move_hostfile_to_userhome(user, filename):
-    cmd_pattern = """sudo chown %s %s && su %s -c "mv %s ~/ && cat %s" """
-    system(cmd_pattern % (user, filename, user, filename, filename))
+def move_hostfile_to_userhome(machines, task_id, user, filename):
+    # cmd_pattern = """sudo su %s -c "cp %s ~/" """
+    hosts = generate_hosts_line(machines=machines, task_id=task_id)
+    write_hosts_to_file(hosts_line=hosts, filename=filename)
+    homedir = pwd.getpwnam(user)[5] + "/"
+    # uid = pwd.getpwnam(user)[2]
+    # gid = pwd.getpwnam(user)[3]
+    os.chmod(filename, 0o666)
+    shutil.copy(filename, homedir)
+    os.remove(filename)
 
 
 if __name__ == '__main__':
-    print(dot_to_underscore("mpi.ivan.docker.net.33"))
-    l = ['a', 'b']
-    print(l.index('a'))
-
-    tmp = generate_hosts_line(["node1", "node2", "node3", "node4"], "mpi_ivan_133")
-    print(add_hostfile_to_command("mpirun -np 3 -ppn 1 -h hostfile.txt ./task -a a1 -b b1",
-                                  hostfile_name="hostfile.txt"))
-    write_hosts_to_file(tmp, "hostfile.txt")
-
-    calculate_cpus(["node1", "node3"], cpu_need=3, cpu_per_node=2)
-
-    move_hostfile_to_userhome("ivan", "hostfile.txt")
+    # print(dot_to_underscore("mpi.ivan.docker.net.33"))
+    # l = ['a', 'b']
+    # print(l.index('a'))
+    #
+    # tmp = generate_hosts_line(["node1", "node2", "node3", "node4"], "mpi_ivan_133")
+    # print(add_hostfile_to_command("mpirun -np 3 -ppn 1 -h hostfile.txt ./task -a a1 -b b1",
+    #                               hostfile_name="hostfile.txt"))
+    # write_hosts_to_file(tmp, "hostfile.txt")
+    #
+    # calculate_cpus(["node1", "node3"], cpu_need=3, cpu_per_node=2)
+    #
+    move_hostfile_to_userhome(["node1", "node2", "node3", "node4"], "mpi_ivan_133", "ivan", "hostfile.txt")
+    # import pwd
+    # d = pwd.getpwnam("ivan")
+    # print(d)

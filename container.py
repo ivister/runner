@@ -107,7 +107,6 @@ class Container(object):
         pattern = """docker exec -d %s sh -c "%s" """
         return pattern % (container_name, command)
 
-
     @staticmethod
     def img_from_cont(cont_name):
         """
