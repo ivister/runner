@@ -77,6 +77,7 @@ def multiply_image(image_file, machines, task_id):
         ftp = ssh.open_sftp()
         ftp.put(image_file, get_remote_name(task_id))
         ftp.close()
+        ssh.close()
 
 
 def get_image_name(data):
