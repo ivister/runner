@@ -42,6 +42,10 @@ def calculate_cpus(machines, cpu_need, cpu_per_node=DEFAULT_CPU_PER_NODE):
     return set_node_cpu, last_node_cpu
 
 
+def get_username_from_pair(pair):
+    return pair.split(":")[0]
+
+
 if __name__ == '__main__':
     print(dot_to_underscore("mpi.ivan.docker.net.33"))
     l = ['a', 'b']
