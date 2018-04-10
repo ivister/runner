@@ -38,12 +38,12 @@ def parse_task_file(filename):
     user = data["user"]
     image_file = data["image_file"]
     task_id = data["task_id"]
-    cpu_count = int(data["cpu_count"])
-    machines = data["machines"].split(" ")
-    command = data["user_command"]
+    cpu_count = int(data["cpu"])
+    machines = data["hosts"].split(" ")
+    command = data["command"]
 
     try:
-        if data["enable_infiniband"] == "yes":
+        if data["use_infiniband"] == "yes":
             enable_ib = True
         else:
             enable_ib = False
@@ -196,7 +196,6 @@ def main():
     multiply_image(image, machines, task_id)
 
     cpu_per_node, cpu_last_node = calculate_cpus(machines, cpu_count, cpu_per_node=DEFAULT_CPU_PER_NODE)
-
     # swarm_token = None
     for num, mach in enumerate(machines):
         if num == 0:
