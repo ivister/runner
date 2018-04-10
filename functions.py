@@ -55,9 +55,26 @@ def add_hostfile_to_command(command, hostfile_name="hostfile.txt"):
         return " ".join(tmp)
 
 
+def generate_hosts_line(machines, task_id):
+    tmp = []
+    for mach in machines:
+        tmp.append("%s.%s" % (mach, task_id))
+    return "\n".join(tmp)
+
+
+def write_hosts_to_file(hosts_line, filename):
+    with open(filename, "w") as fil:
+        fil.write(hosts_line)
+    return filename
+
+
 if __name__ == '__main__':
     print(dot_to_underscore("mpi.ivan.docker.net.33"))
     l = ['a', 'b']
     print(l.index('a'))
+
+    tmp = generate_hosts_line(["node1", "node2", "node3", "node4"], "mpi_ivan_133")
+
+    write_hosts_to_file(tmp, "hostfile.txt")
 
     calculate_cpus(["node1", "node3"], cpu_need=3, cpu_per_node=2)
