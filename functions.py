@@ -46,6 +46,15 @@ def get_username_from_pair(pair):
     return pair.split(":")[0]
 
 
+def add_hostfile_to_command(command, hostfile_name="hostfile.txt"):
+    if ("--hostfile" in command) or ("-h" in command):
+        return command
+    else:
+        tmp = command.split(" ")
+        tmp[0] += " --hostfile %s " % hostfile_name
+        return " ".join(tmp)
+
+
 if __name__ == '__main__':
     print(dot_to_underscore("mpi.ivan.docker.net.33"))
     l = ['a', 'b']
