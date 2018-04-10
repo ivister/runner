@@ -1,6 +1,7 @@
 """
 """
 from default import DEFAULT_CPU_PER_NODE
+from os import system
 
 
 def get_remote_name(task_id):
@@ -37,8 +38,8 @@ def add_dot_txt(filename):
 def calculate_cpus(machines, cpu_need, cpu_per_node=DEFAULT_CPU_PER_NODE):
     set_node_cpu = cpu_per_node
     last_node_cpu = cpu_need - (len(machines) - 1) * cpu_per_node
-    print(set_node_cpu)
-    print(last_node_cpu)
+    # print(set_node_cpu)
+    # print(last_node_cpu)
     return set_node_cpu, last_node_cpu
 
 
@@ -68,13 +69,21 @@ def write_hosts_to_file(hosts_line, filename):
     return filename
 
 
+def move_hostfile_to_userhome(user, filename):
+    cmd_pattern = """sudo chown %s %s && su %s -c "mv %s ~/ && cat %s" """
+    system(cmd_pattern % (user, filename, user, filename, filename))
+
+
 if __name__ == '__main__':
     print(dot_to_underscore("mpi.ivan.docker.net.33"))
     l = ['a', 'b']
     print(l.index('a'))
 
     tmp = generate_hosts_line(["node1", "node2", "node3", "node4"], "mpi_ivan_133")
-
+    print(add_hostfile_to_command("mpirun -np 3 -ppn 1 -h hostfile.txt ./task -a a1 -b b1",
+                                  hostfile_name="hostfile.txt"))
     write_hosts_to_file(tmp, "hostfile.txt")
 
     calculate_cpus(["node1", "node3"], cpu_need=3, cpu_per_node=2)
+
+    move_hostfile_to_userhome("ivan", "hostfile.txt")
