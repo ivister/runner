@@ -16,6 +16,9 @@ RUN yum groupinstall -y "Infiniband Support" && \
 RUN yum install -y libibverbs && \
    yum install -y mvapich2-2.2.x86_64 mvapich2-2.2-devel.x86_64
 
+RUN echo "soft memlock unlimited" >> /etc/security/limits.conf && \
+    echo "hard memlock unlimited" >> /etc/security/limits.conf
+
 RUN useradd -d /home/ivan -g 100 -u 1001 ivan
 
 RUN mkdir /ssh && \
