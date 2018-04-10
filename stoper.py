@@ -6,7 +6,7 @@ import argparse
 import paramiko
 from container import Container
 from network import EthernetNetwork
-from swarm import Swarm
+# from swarm import Swarm
 from functions import dot_to_underscore
 
 
@@ -40,7 +40,7 @@ def clean_machine(hostname, or_task_id):
     """
 
     task_id = dot_to_underscore(or_task_id)
-    cont_name = task_id
+    cont_name = "%s_%s" % (hostname, task_id)
 
     ssh_client = paramiko.SSHClient()
     ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -61,7 +61,7 @@ def clean_machine(hostname, or_task_id):
 
     _, _, stderr = ssh_client.exec_command(EthernetNetwork.remove(task_id))
 
-    _, _, stderr = ssh_client.exec_command(Swarm.get_leave_command())
+    # _, _, stderr = ssh_client.exec_command(Swarm.get_leave_command())
 
     _ = stderr.read().decode()
 

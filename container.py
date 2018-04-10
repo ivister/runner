@@ -23,7 +23,7 @@ class Container(object):
     __interactive_flag = '-i'
     __security_flag = '--security-opt=no-new-privileges'
     # TODO: check ib_devices
-    __ib_devices = "--device=/dev/infiniband/uverbs0 --device/dev/infiniband/rdma_cm "
+    __ib_devices = " --device=/dev/infiniband/uverbs0 --device/dev/infiniband/rdma_cm"
 
     def __init__(self, **kwargs):
 
@@ -36,7 +36,7 @@ class Container(object):
             kwargs.pop("interactive")
             self.__type = self.__interactive_flag
         if "enable_ib" in kwargs.keys():
-            self.__ib = True
+            self.__ib = kwargs["enable_ib"]
             kwargs.pop("enable_ib")
 
         for key in kwargs.keys():

@@ -7,7 +7,7 @@ from network import EthernetNetwork
 from container import Container
 from default import DEFAULT_VOLUMES
 from default import DEFAULT_CPU_PER_NODE
-from swarm import Swarm
+# from swarm import Swarm
 from functions import get_remote_name
 from functions import dot_to_underscore
 from functions import add_dot_txt
@@ -141,9 +141,8 @@ def run_image(client, image_name, task_id, user, main_hostname, enable_ib, cpu_c
 
     container = Container(volumes=DEFAULT_VOLUMES,
                           detach=True,
-                          name=task_id,
+                          name="%s_%s" % (main_hostname, task_id),
                           net=task_id,
-                          hostname="%s.%s" % (main_hostname, task_id),
                           user=user,
                           enable_ib=enable_ib,
                           cpus=cpu_count,
@@ -160,27 +159,27 @@ def run_image(client, image_name, task_id, user, main_hostname, enable_ib, cpu_c
     stderr.flush()
 
 
-def configure_machine(hostname, task_id, user, swarm_token, cpu_count, enable_ib=False):
+def configure_machine(hostname, task_id, user, cpu_count, enable_ib=False, network_need=False):
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     client.connect(hostname=hostname)
 
-    if not swarm_token:
-        swarm_token = Swarm.init_swarm(client)
-    else:
-        Swarm.connect_to_swarm(client, swarm_token)
+    # if not swarm_token:
+    #     swarm_token = Swarm.init_swarm(client)
+    # else:
+    #     Swarm.connect_to_swarm(client, swarm_token)
+    if network_need:
+        network = EthernetNetwork(attachable=True, name=task_id,
+                                  driver="calico", ipam_driver="calico")
+        create_network(client, network)
 
-    network = EthernetNetwork(attachable=True, name=task_id,
-                              driver="calico", ipam_driver="calico")
-
-    create_network(client, network)
     image_name = load_image(client=client, image_file=get_remote_name(task_id))
 
     run_image(client=client, image_name=image_name, task_id=task_id, user=user,
-              main_hostname=hostname, cpu_count=cpu_count)
+              main_hostname=hostname, cpu_count=cpu_count, enable_ib=enable_ib)
     client.close()
 
-    return swarm_token
+    # return swarm_token
 
 
 def main():
@@ -191,17 +190,16 @@ def main():
 
     cpu_per_node, cpu_last_node = calculate_cpus(machines, cpu_count, cpu_per_node=DEFAULT_CPU_PER_NODE)
 
-    swarm_token = None
-    for mach in machines:
-        print(swarm_token)
-        if machines.index(mach) == 0:
-            swarm_token = configure_machine(hostname=mach, task_id=task_id,
-                                            user=user, swarm_token=swarm_token,
-                                            cpu_count=cpu_last_node, enable_ib=enable_ib)
+    # swarm_token = None
+    for num, mach in enumerate(machines):
+        if num == 0:
+            cpu = cpu_last_node
+            network = True
         else:
-            swarm_token = configure_machine(hostname=mach, task_id=task_id,
-                                            user=user, swarm_token=swarm_token,
-                                            cpu_count=cpu_per_node, enable_ib=enable_ib)
+            network = False
+            cpu = cpu_per_node
+        configure_machine(hostname=mach, task_id=task_id,
+                          user=user, cpu_count=cpu, enable_ib=enable_ib, network_need=network)
 
     export_task_info(task_id=or_task_id, machines=machines)
 
