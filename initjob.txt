@@ -2,8 +2,8 @@
     "user":"ivan:users",
     "image_file":"image.tar",
     "task_id":"mpi.ivan.133",
-    "hosts":"node2 node1",
-    "use_infiniband":"no",
+    "hosts":"a13 a14 a15",
+    "use_infiniband":"yes",
     "command":"mpirun ...",
-    "cpu":"3"
+    "cpu":"5"
 }
