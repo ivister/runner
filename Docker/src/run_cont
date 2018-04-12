@@ -1,8 +1,7 @@
 #!/bin/bash
 docker run -d \
-    --rm \
-    --user=1001:101 \
-    --device=/dev/infiniband:/dev/infiniband \
+    --device=/dev/infiniband/uverbs0 \
+    --device=/dev/infiniband/rdma_cm \
     --volume=/home:/home \
     --hostname=my_cont \
     -P \
