@@ -161,6 +161,8 @@ def run_image(client, image_name, task_id, user, main_hostname, enable_ib, cpu_c
     print(run_command)
 
     stdin, stdout, stderr = client.exec_command(run_command)
+    stdout.read()
+    stderr.read()
     stdin.flush()
     stdout.flush()
     stderr.flush()
