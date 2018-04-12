@@ -13,6 +13,14 @@ RUN echo "+:ivan:ALL" >> /etc/security/access.conf
 RUN yum install -y yum-utils
 RUN yum groupinstall -y "Infiniband Support" && \
     yum groupinstall -y "Development Tools"
+
+RUN curl -o hwloc.tar.gz https://www.open-mpi.org/software/hwloc/v2.0/downloads/hwloc-2.0.1.tar.gz && \
+    tar -xvzf hwloc.tar.gz && \
+    cd hwloc-2.0.1 && \
+    ./configure && \
+    make && \
+    make install
+
 RUN yum install -y libibverbs && \
    yum install -y mvapich2-2.2.x86_64 mvapich2-2.2-devel.x86_64
 
