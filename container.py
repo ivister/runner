@@ -23,7 +23,7 @@ class Container(object):
     __interactive_flag = '-i'
     __security_flag = '--security-opt=no-new-privileges'
     # TODO: check ib_devices
-    __ib_devices = " --device=/dev/infiniband/uverbs0 --device/dev/infiniband/rdma_cm"
+    __ib_devices = " --device=/dev/infiniband/uverbs0 --device=/dev/infiniband/rdma_cm"
 
     def __init__(self, **kwargs):
 
