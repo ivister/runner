@@ -8,6 +8,7 @@ class EthernetNetwork(object):
     """
     """
     __available_args = ["driver",
+                        "ipam_driver",
                         "subnet",
                         "gateway",
                         "ip_range",
@@ -39,8 +40,11 @@ class EthernetNetwork(object):
         """
         command = "docker network create %s" % dict_to_string(self.__kwargs)
 
-        if hasattr(self, "__is_attachable"):
-            command += " %s" % self.__attachable_flag
+        try:
+            if self.__is_attachable:
+                command += " %s" % self.__attachable_flag
+        except AttributeError:
+            pass
         command += " %s" % self.__name
         return command
 
@@ -66,7 +70,7 @@ class EthernetNetwork(object):
 
 if __name__ == '__main__':
     o = EthernetNetwork(attachable=True, gateway="haha_gw",
-                        name="my_net", driver="overlay", subnet="subnet")
+                        name="my_net", driver="overlay", subnet="subnet", ipam_driver="calico")
     print(o.create_command)
     print(o.remove_command)
     print(EthernetNetwork.remove("my_net"))

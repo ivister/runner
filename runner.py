@@ -6,6 +6,16 @@ import paramiko
 from network import EthernetNetwork
 from container import Container
 from default import DEFAULT_VOLUMES
+from default import DEFAULT_CPU_PER_NODE
+# from swarm import Swarm
+from functions import get_remote_name
+from functions import dot_to_underscore
+from functions import add_dot_txt
+from functions import calculate_cpus
+from functions import add_hostfile_to_command
+from functions import get_username_from_pair
+from functions import move_hostfile_to_userhome
+from executor import run_user_command
 
 
 def get_filename():
@@ -28,9 +38,19 @@ def parse_task_file(filename):
     user = data["user"]
     image_file = data["image_file"]
     task_id = data["task_id"]
-    machines = data["machines"].split(" ")
+    cpu_count = int(data["cpu"])
+    machines = data["hosts"].split(" ")
+    command = data["command"]
 
-    return user, image_file, task_id, machines
+    try:
+        if data["use_infiniband"] == "yes":
+            enable_ib = True
+        else:
+            enable_ib = False
+    except json.JSONDecodeError:
+        enable_ib = False
+
+    return user, image_file, task_id, machines, cpu_count, enable_ib, command
 
 
 def export_task_info(task_id, machines):
@@ -39,17 +59,17 @@ def export_task_info(task_id, machines):
     :param machines:
     :return:
     """
-    with open("task.txt", "w") as json_file:
+    with open(add_dot_txt(task_id), "w") as json_file:
         json.dump(
             {
-                "container": task_id,
+                "task_id": task_id,
                 "machines": " ".join(machines)
             },
             json_file
         )
 
 
-def multiply_image(image_file, machines):
+def multiply_image(image_file, machines, task_id):
     """
     :param image_file:
     :param machines:
@@ -61,8 +81,9 @@ def multiply_image(image_file, machines):
         ssh.connect(mach)
 
         ftp = ssh.open_sftp()
-        ftp.put(image_file, image_file)
+        ftp.put(image_file, get_remote_name(task_id))
         ftp.close()
+        ssh.close()
 
 
 def get_image_name(data):
@@ -110,6 +131,7 @@ def create_network(client, eth_net):
     :return:
     """
     stdin, stdout, stderr = client.exec_command(eth_net.create_command)
+    print(eth_net.create_command)
     data = stdout.read()
     _ = stderr.read()
 
@@ -122,18 +144,15 @@ def create_network(client, eth_net):
     return net_id
 
 
-def run_image(client, image_name, task_id, user):
-    """
-    :param client:
-    :param image_name:
-    :param task_id:
-    :param user:
-    :return:
-    """
+def run_image(client, image_name, task_id, user, main_hostname, enable_ib, cpu_count=DEFAULT_CPU_PER_NODE):
+
     container = Container(volumes=DEFAULT_VOLUMES,
                           detach=True,
-                          name=task_id,
+                          name="%s_%s" % (main_hostname, task_id),
+                          net=task_id,
                           user=user,
+                          enable_ib=enable_ib,
+                          cpus=cpu_count,
                           image=image_name)
     run_command = container.run_command
 
@@ -147,40 +166,54 @@ def run_image(client, image_name, task_id, user):
     stderr.flush()
 
 
-def configure_machine(hostname, image_file, task_id, user):
-    """
-    :param hostname:
-    :param image_file:
-    :param task_id:
-    :param user:
-    :return:
-    """
+def configure_machine(hostname, task_id, user, cpu_count, enable_ib=False, network_need=False):
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     client.connect(hostname=hostname)
 
-    network = EthernetNetwork(attachable=True, name=task_id,
-                              driver="overlay", subnet="192.168.1.0/24")
+    # if not swarm_token:
+    #     swarm_token = Swarm.init_swarm(client)
+    # else:
+    #     Swarm.connect_to_swarm(client, swarm_token)
+    if network_need:
+        network = EthernetNetwork(attachable=True, name=task_id,
+                                  driver="calico", ipam_driver="calico")
+        create_network(client, network)
 
-    create_network(client, network)
-    image_name = load_image(client=client, image_file=image_file)
+    image_name = load_image(client=client, image_file=get_remote_name(task_id))
 
-    run_image(client=client, image_name=image_name, task_id=task_id, user=user)
+    run_image(client=client, image_name=image_name, task_id=task_id, user=user,
+              main_hostname=hostname, cpu_count=cpu_count, enable_ib=enable_ib)
     client.close()
 
-    return network.get_name()
+    # return swarm_token
 
 
 def main():
     filename = get_filename()
-    user, image, task_id, machines = parse_task_file(filename)
-    multiply_image(image, machines)
+    user, image, or_task_id, machines, cpu_count, enable_ib, user_command = parse_task_file(filename)
+    task_id = dot_to_underscore(or_task_id)
+    multiply_image(image, machines, task_id)
 
-    for mach in machines:
-        configure_machine(hostname=mach, image_file=image,
-                          task_id=task_id, user=user)
+    cpu_per_node, cpu_last_node = calculate_cpus(machines, cpu_count, cpu_per_node=DEFAULT_CPU_PER_NODE)
+    # swarm_token = None
+    for num, mach in enumerate(machines):
+        if num == 0:
+            cpu = cpu_last_node
+            network = True
+        else:
+            network = False
+            cpu = cpu_per_node
+        configure_machine(hostname=mach, task_id=task_id,
+                          user=user, cpu_count=cpu, enable_ib=enable_ib, network_need=network)
 
-    export_task_info(task_id=task_id, machines=machines)
+    export_task_info(task_id=or_task_id, machines=machines)
+
+    # move_hostfile_to_userhome(machines=machines, task_id=task_id,
+    #                           user=get_username_from_pair(user), filename=add_dot_txt(task_id))
+    # user_command = add_hostfile_to_command(user_command, hostfile_name=add_dot_txt(task_id))
+    # run_user_command(task_id=task_id, host=machines[0], command=user_command)
+
 
 if __name__ == '__main__':
     main()

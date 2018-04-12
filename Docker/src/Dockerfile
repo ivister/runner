@@ -3,22 +3,32 @@ MAINTAINER Andrey Alexeev <salexs95@yandex.ru>
 
 RUN yum update -y
 
-RUN yum install -y openssh-server initscripts openssh  openssh-clients && \
-    sed -ri 's/#   StrictHostKeyChecking ask/StrictHostKeyChecking no/g' /etc/ssh/ssh_config
+RUN yum install -y openssh-server initscripts openssh  openssh-clients
+
+RUN sed -ri 's/#   StrictHostKeyChecking ask/StrictHostKeyChecking no/g' /etc/ssh/ssh_config && \
+    sed -ri 's/#   Port 22/Port 2222/g' /etc/ssh/ssh_config
+
+RUN echo "+:ivan:ALL" >> /etc/security/access.conf
 
 RUN yum install -y yum-utils
-
 RUN yum groupinstall -y "Infiniband Support" && \
     yum groupinstall -y "Development Tools"
-
 RUN yum install -y libibverbs && \
    yum install -y mvapich2-2.2.x86_64 mvapich2-2.2-devel.x86_64
 
-EXPOSE 22
+RUN echo "soft memlock unlimited" >> /etc/security/limits.conf && \
+    echo "hard memlock unlimited" >> /etc/security/limits.conf
 
-RUN useradd -d /home/ivan -g users -u 1001 ivan
+RUN useradd -d /home/ivan -g 100 -u 1001 ivan
+
+RUN mkdir /ssh && \
+    touch /ssh/sshd_log
+ADD sshd_config /ssh
+RUN ssh-keygen -t rsa -b 4096 -f /ssh/ssh_host_rsa_key && \
+    chown 1001:100 --recursive /ssh
+
+EXPOSE 2222 
+
 VOLUME /home:/home
 
-#RUN ssh-keygen -t rsa -b 4096 -f /etc/ssh/ssh_host_rsa_key
-CMD ["/usr/sbin/sshd", "-D"]
-
+CMD ["/usr/sbin/sshd", "-D", "-f", "/ssh/sshd_config", "-E", "/ssh/sshd_log"]
