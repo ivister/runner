@@ -12,7 +12,8 @@ RUN echo "+:ivan:ALL" >> /etc/security/access.conf
 
 RUN yum install -y yum-utils
 RUN yum groupinstall -y "Infiniband Support" && \
-    yum groupinstall -y "Development Tools"
+    yum groupinstall -y "Development Tools" && \
+    yum install -y libibverbs
 
 RUN curl -o hwloc.tar.gz https://www.open-mpi.org/software/hwloc/v2.0/downloads/hwloc-2.0.1.tar.gz && \
     tar -xvzf hwloc.tar.gz && \
@@ -21,8 +22,16 @@ RUN curl -o hwloc.tar.gz https://www.open-mpi.org/software/hwloc/v2.0/downloads/
     make && \
     make install
 
-RUN yum install -y libibverbs && \
-   yum install -y mvapich2-2.2.x86_64 mvapich2-2.2-devel.x86_64
+RUN curl -o openmpi-3.0.1.tar.gz https://www.open-mpi.org/software/ompi/v3.0/downloads/openmpi-3.0.1.tar.gz && \
+    tar -xvzf openmpi-3.0.1.tar.gz && \
+    cd openmpi-3.0.1 && \
+    ./configure --prefix=/usr/lib64/openmpi3/ && \
+    make && \
+    make install
+
+
+# RUN yum install -y libibverbs && \
+#    yum install -y mvapich2-2.2.x86_64 mvapich2-2.2-devel.x86_64
 
 RUN echo "* soft memlock unlimited" >> /etc/security/limits.conf && \
     echo "* hard memlock unlimited" >> /etc/security/limits.conf
