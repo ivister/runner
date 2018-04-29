@@ -21,9 +21,11 @@ class Container(object):
                         "name"]
     __detach_flag = '--detach'
     __interactive_flag = '-i'
-    __security_flag = '--security-opt=no-new-privileges'
+    __security_flag = '' # --security-opt=no-new-privileges'
     # TODO: check ib_devices
     __ib_devices = " --device=/dev/infiniband/uverbs0 --device=/dev/infiniband/rdma_cm"
+    __memlock = " --ulimit memlock=-1:-1"    
+
 
     def __init__(self, **kwargs):
 
@@ -57,7 +59,7 @@ class Container(object):
         command += " %s" % self.__security_flag
 
         if self.__ib:
-            command += self.__ib_devices
+            command += self.__ib_devices + self.__memlock
 
         command += " %s" % self.__type
         command += volumes_to_string(self.__kwargs["volumes"])

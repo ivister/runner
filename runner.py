@@ -148,7 +148,7 @@ def run_image(client, image_name, task_id, user, main_hostname, enable_ib, cpu_c
 
     container = Container(volumes=DEFAULT_VOLUMES,
                           detach=True,
-                          name="%s_%s" % (main_hostname, task_id),
+                          name="%s-%s" % (main_hostname, task_id),
                           net=task_id,
                           user=user,
                           enable_ib=enable_ib,
