@@ -1,0 +1,7 @@
+Process 2 of 5 is on 37eff7e817ee
+Process 0 of 5 is on cb1479885879
+Process 4 of 5 is on 6511b189f06b
+Process 1 of 5 is on 6511b189f06b
+Process 3 of 5 is on cb1479885879
+pi is approximately 3.1415926544231230, Error is 0.0000000008333298
+wall clock time = 0.051757
