@@ -106,7 +106,7 @@ class Container(object):
 
     @staticmethod
     def exec_command(container_name, command):
-        pattern = """docker exec -d %s sh -c "%s" """
+        pattern = """docker exec -d %s sh -c "%s >> result.txt" """
         return pattern % (container_name, command)
 
     @staticmethod
