@@ -40,7 +40,7 @@ def clean_machine(hostname, or_task_id):
     """
 
     task_id = dot_to_underscore(or_task_id)
-    cont_name = "%s_%s" % (hostname, task_id)
+    cont_name = "%s-%s" % (hostname, task_id)
 
     ssh_client = paramiko.SSHClient()
     ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
