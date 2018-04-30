@@ -30,7 +30,7 @@ def volumes_to_string(vol_string):
 
 
 def dot_to_underscore(dot_text):
-    return "_".join(dot_text.split("."))
+    return "-".join(dot_text.split("."))
 
 
 def add_dot_txt(filename):

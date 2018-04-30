@@ -211,10 +211,10 @@ def main():
 
     export_task_info(task_id=or_task_id, machines=machines)
 
-    move_hostfile_to_userhome(machines=machines, task_id=task_id,
-                              user=get_username_from_pair(user), filename=add_dot_txt(task_id))
-    user_command = add_hostfile_to_command(user_command, hostfile_name=add_dot_txt(task_id))
-    run_user_command(task_id=task_id, host=machines[0], command=user_command)
+    # move_hostfile_to_userhome(machines=machines, task_id=task_id,
+    #                           user=get_username_from_pair(user), filename=add_dot_txt(task_id))
+    # user_command = add_hostfile_to_command(user_command, hostfile_name=add_dot_txt(task_id))
+    # run_user_command(task_id=task_id, host=machines[0], command=user_command)
 
 
 if __name__ == '__main__':

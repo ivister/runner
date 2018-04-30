@@ -1,9 +1,10 @@
 {
     "user":"ivan:users",
-    "image_file":"image.tar",
+    "image_file":"mvapich.tar",
     "task_id":"mpi.ivan.133",
     "hosts":"a13 a14 a15",
     "use_infiniband":"yes",
-    "command":"mpirun ...",
-    "cpu":"5"
+    "command":"mpirun -np 5 --hostfile /home/ivan/hst ./hw 1> ~/out 2> ~/err",
+    "cpu":"5",
+    "nodes":"node[1,23-25]"
 }

@@ -21,7 +21,7 @@ class Container(object):
                         "name"]
     __detach_flag = '--detach'
     __interactive_flag = '-i'
-    __security_flag = '' # --security-opt=no-new-privileges'
+    __security_flag = ' --security-opt=no-new-privileges'
     # TODO: check ib_devices
     __ib_devices = " --device=/dev/infiniband/uverbs0 --device=/dev/infiniband/rdma_cm"
     __memlock = " --ulimit memlock=-1:-1"    
