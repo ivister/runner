@@ -24,8 +24,8 @@ class Container(object):
     __security_flag = ' --security-opt=no-new-privileges'
     # TODO: check ib_devices
     __ib_devices = " --device=/dev/infiniband/uverbs0 --device=/dev/infiniband/rdma_cm"
-    __memlock = " --ulimit memlock=-1:-1"    
 
+    __limits = " --ulimit memlock=-1:-1"
 
     def __init__(self, **kwargs):
 
@@ -59,7 +59,8 @@ class Container(object):
         command += " %s" % self.__security_flag
 
         if self.__ib:
-            command += self.__ib_devices + self.__memlock
+            command += self.__ib_devices
+            command += self.__limits
 
         command += " %s" % self.__type
         command += volumes_to_string(self.__kwargs["volumes"])
@@ -106,7 +107,7 @@ class Container(object):
 
     @staticmethod
     def exec_command(container_name, command):
-        pattern = """docker exec -d %s sh -c "%s >> result.txt" """
+        pattern = """docker exec -d %s sh -c "%s" """
         return pattern % (container_name, command)
 
     @staticmethod
