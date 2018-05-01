@@ -1,8 +1,8 @@
 """
 """
 
-from functions import volumes_to_string
-from functions import dict_to_string
+from dockertasks.functions import volumes_to_string
+from dockertasks.functions import dict_to_string
 
 
 class Container(object):

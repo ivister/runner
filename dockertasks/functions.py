@@ -1,6 +1,6 @@
 """
 """
-from default import DEFAULT_CPU_PER_NODE
+from dockertasks.default import DEFAULT_CPU_PER_NODE
 import shutil
 import pwd
 import os

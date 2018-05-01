@@ -3,19 +3,18 @@
 import json
 import argparse
 import paramiko
-from network import EthernetNetwork
-from container import Container
-from default import DEFAULT_VOLUMES
-from default import DEFAULT_CPU_PER_NODE
+from dockertasks.network import EthernetNetwork
+from dockertasks.container import Container
+from dockertasks.default import DEFAULT_VOLUMES
+from dockertasks.default import DEFAULT_CPU_PER_NODE
 # from swarm import Swarm
-from functions import get_remote_name
-from functions import dot_to_underscore
-from functions import add_dot_txt
-from functions import calculate_cpus
-from functions import add_hostfile_to_command
-from functions import get_username_from_pair
-from functions import move_hostfile_to_userhome
-from executor import run_user_command
+from dockertasks.functions import get_remote_name
+from dockertasks.functions import dot_to_underscore
+from dockertasks.functions import add_dot_txt
+from dockertasks.functions import calculate_cpus
+from dockertasks.functions import get_username_from_pair
+from dockertasks.functions import move_hostfile_to_userhome
+from dockertasks.executor import run_user_command
 
 
 DEBUG_MODE = False
@@ -214,8 +213,8 @@ def main():
 
     export_task_info(task_id=or_task_id, machines=machines)
 
-    # move_hostfile_to_userhome(machines=machines, task_id=task_id,
-    #                           user=get_username_from_pair(user), filename="hst")
+    move_hostfile_to_userhome(machines=machines, task_id=task_id,
+                              user=get_username_from_pair(user), filename="hst")
     # user_command = add_hostfile_to_command(user_command, hostfile_name=add_dot_txt(task_id))
     run_user_command(task_id=task_id, host=machines[0], command=user_command)
 

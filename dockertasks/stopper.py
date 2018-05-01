@@ -4,10 +4,10 @@ import json
 import os
 import argparse
 import paramiko
-from container import Container
-from network import EthernetNetwork
+from dockertasks.container import Container
+from dockertasks.network import EthernetNetwork
 # from swarm import Swarm
-from functions import dot_to_underscore
+from dockertasks.functions import dot_to_underscore
 
 
 def get_filename():

@@ -1,6 +1,6 @@
 """
 """
-from default import DEFAULT_ADAPTER
+from dockertasks.default import DEFAULT_ADAPTER
 
 
 class Swarm(object):

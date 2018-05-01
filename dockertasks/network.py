@@ -1,7 +1,7 @@
 """
 """
 
-from functions import dict_to_string
+from dockertasks.functions import dict_to_string
 
 
 class EthernetNetwork(object):

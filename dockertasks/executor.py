@@ -1,7 +1,7 @@
 """
 """
 import paramiko
-from container import Container
+from dockertasks.container import Container
 
 
 def run_user_command(task_id, host, command):
