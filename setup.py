@@ -1,8 +1,8 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(
     name="dockertasks",
-    version="0.0.1",
+    version="0.0.2",
     packages=['dockertasks'],
     description="Package for SUPPZ",
     long_description="",
@@ -18,6 +18,8 @@ setup(
     entry_points={
         'console_scripts':
             ['task_run=dockertasks.runner:main',
-             'task_stop=dockertasks.stopper:main']
+             'task_stop=dockertasks.stopper:main',
+             'task_build=dockertasks.builder:main'
+             ]
     }
 )
