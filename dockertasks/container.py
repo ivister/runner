@@ -37,11 +37,6 @@ class Container(object):
         elif "interactive" in kwargs.keys():
             kwargs.pop("interactive")
             self.__type = self.__interactive_flag
-        if "enable_ib" in kwargs.keys():
-            self.__ib = kwargs["enable_ib"]
-            kwargs.pop("enable_ib")
-        else:
-            self.__ib = False
 
         for key in kwargs.keys():
             if key not in self.__available_args:
@@ -58,9 +53,8 @@ class Container(object):
         command = "docker run"
         command += " %s" % self.__security_flag
 
-        if self.__ib:
-            command += self.__ib_devices
-            command += self.__limits
+        command += self.__ib_devices
+        command += self.__limits
 
         command += " %s" % self.__type
         command += volumes_to_string(self.__kwargs["volumes"])

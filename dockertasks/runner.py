@@ -44,15 +44,7 @@ def parse_task_file(filename):
     machines = data["hosts"].split(" ")
     command = data["command"]
 
-    try:
-        if data["use_infiniband"] == "yes":
-            enable_ib = True
-        else:
-            enable_ib = False
-    except json.JSONDecodeError:
-        enable_ib = False
-
-    return user, image_file, task_id, machines, cpu_count, enable_ib, command
+    return user, image_file, task_id, machines, cpu_count, command
 
 
 def export_task_info(task_id, machines):
@@ -170,7 +162,7 @@ def run_image(client, image_name, task_id, user, main_hostname, enable_ib, cpu_c
     stderr.flush()
 
 
-def configure_machine(hostname, task_id, user, cpu_count, enable_ib=False, network_need=False):
+def configure_machine(hostname, task_id, user, cpu_count, network_need=False):
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     client.connect(hostname=hostname)
@@ -187,7 +179,7 @@ def configure_machine(hostname, task_id, user, cpu_count, enable_ib=False, netwo
     image_name = load_image(client=client, image_file=get_remote_name(task_id))
 
     run_image(client=client, image_name=image_name, task_id=task_id, user=user,
-              main_hostname=hostname, cpu_count=cpu_count, enable_ib=enable_ib)
+              main_hostname=hostname, cpu_count=cpu_count)
     client.close()
 
     # return swarm_token
@@ -195,7 +187,7 @@ def configure_machine(hostname, task_id, user, cpu_count, enable_ib=False, netwo
 
 def main():
     filename = get_filename()
-    user, image, or_task_id, machines, cpu_count, enable_ib, user_command = parse_task_file(filename)
+    user, image, or_task_id, machines, cpu_count, user_command = parse_task_file(filename)
     task_id = dot_to_underscore(or_task_id)
     multiply_image(image, machines, task_id)
 
@@ -209,7 +201,7 @@ def main():
             network = False
             cpu = cpu_per_node
         configure_machine(hostname=mach, task_id=task_id,
-                          user=user, cpu_count=cpu, enable_ib=enable_ib, network_need=network)
+                          user=user, cpu_count=cpu, network_need=network)
 
     export_task_info(task_id=or_task_id, machines=machines)
 

@@ -1,0 +1,140 @@
+# Это комментарий
+# Следующая строка - название секции
+[General]
+# Далее идет содержимое секции
+# Следующая срока определяет имя задачи
+task_name = sleep600.sh
+# Следующая срока определяет имя каталога
+# стандартного ввода/вывода
+host_directory = /home/pyworker/prog
+# Следующая срока определяет необходимое число
+# процессоров для выполнения задачи
+# Если указывается значение any, то число процессоров
+# должно быть определено при старте задачи
+#cpu_count = 1
+really_cpu = 1
+cpu_count = 8
+# Следующая строка - название секции
+# Секция не обязательная
+home_number = 
+system = default
+run_number = 2
+user = pyworker
+group = pyworker
+job_id = 474
+task_directory = /common/runmvs/tasks/pyworker.sleep600.sh.2
+restore_mode = no
+[TimeRequest]
+# Время (по максимуму), необходимое для выполнения задачи,
+# указывается в минутах
+limit = 5
+# количество повторов задачи
+#repeat_times = 
+# значение кванта, указывается в минутах
+# если указать 0, то квант игнорируется (задача не фоновая)
+quant = 0
+#
+term_time = 0
+term_signal = 123
+repeat_times = 1
+unlimited = no
+
+[Redirections]
+stdin=
+stdout=
+stderr=
+interactive=no
+[Globus_Conf]
+globus_id=
+[Locals]
+[Batch]
+code : "
+    #!/bin/bash
+    export HISTCONTROL="ignoredups"
+    export HISTSIZE="1000"
+    export HOME="/home/pyworker"
+    export HOSTNAME="node1199.eth0.mvs50k.jscc.ru"
+    export LANG="ru_RU.UTF-8"
+    export LESSOPEN="||/usr/bin/lesspipe.sh %s"
+    export LOGNAME="pyworker"
+    export LS_COLORS="rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=01;05;37;41:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.jpg=01;35:*.jpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.axv=01;35:*.anx=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=01;36:*.au=01;36:*.flac=01;36:*.mid=01;36:*.midi=01;36:*.mka=01;36:*.mp3=01;36:*.mpc=01;36:*.ogg=01;36:*.ra=01;36:*.wav=01;36:*.axa=01;36:*.oga=01;36:*.spx=01;36:*.xspf=01;36:"
+    export MAIL="/var/spool/mail/pyworker"
+    export OLDPWD
+    export PATH="/common/runmvs/bin:/usr/runmvs/bin:/common/runmvs/sbin/:/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/pyworker/.local/bin:/home/pyworker/bin"
+    export PWD="/home/pyworker/prog"
+    export SHELL="/bin/bash"
+    export SHLVL="2"
+    export TERM="screen"
+    export USER="pyworker"
+    export XDG_SESSION_ID="777"
+    EnvCommandLine=(
+    )
+    num_nodes=1
+    hosts_list="$2"
+    exitstatus_file="$3"
+    prefix="$5"
+    task_image="$4"
+    np=1
+    tview_flag=
+    progname="$5 /home/pyworker/prog/sleep600.sh"
+    mpich_args=""
+    cmdLineArgs=" -maxtime 20 -np 2"
+    width_distribution=0
+    numofnodes=1
+    proc_per_node=
+
+
+    MPIRUN_HOME=/common/mvapich/bin
+    # cd "/home/pyworker/prog"
+    
+    if [  "" ] ;then
+      machine_file=`mktemp /tmp/machinefile.XXXXXX` || exit 1
+      /common/runmvs/bin/confread $task_image Machinefile > $machine_file 
+      gentmpname=`mktemp /tmp/machines.XXXXXX` || exit 1
+      /common/runmvs/bin/genmachinefile "$hosts_list" $machine_file 1 >$gentmpname
+      hosts_list=$gentmpname
+      rm -f $machine_file
+    fi
+
+    trap ' if [ "" ] ; then   rm $gentmpname ;fi ; exit '  1 2 3 15
+    
+    
+    
+    EnvCommandLine=(  "${EnvCommandLine[@]}" MACHINEFILE_NAME=$hosts_list ) 
+	export LMUTIL=lmutil
+    
+    
+    if [ x = x-totalview ]
+    then
+	if ! check_license -c /common/totalview/license.dat -f TV/Base
+	then
+	    sleep 1
+	    echo 215 >$exitstatus_file
+	    exit 215
+	fi
+    fi
+    (
+    
+    . /common/runmvs/bin/run-mvapich-ib
+    
+    )
+    exitstatus=$?
+
+    if [ 0 -ne 0 ] ; then
+	exitstatus=215
+    fi
+    
+    
+    if [ "" ] ; then   rm $gentmpname ;fi 
+    echo $exitstatus >$exitstatus_file
+    exit $exitstatus
+    
+    "
+[Queue]
+queue_dir = /usr/runmvs/users/pyworker/queue
+start_time = 
+
+[TaskNodes]
+[Nodes]
+node1193=8
+node1182=4
