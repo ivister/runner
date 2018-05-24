@@ -20,7 +20,7 @@ class Container(object):
                         "enable_ib",
                         "name"]
     __detach_flag = '--detach'
-    __interactive_flag = '-i'
+    __interactive_flag = '-it'
     __security_flag = '--security-opt=no-new-privileges'
     # TODO: check ib_devices
     __ib_devices = ["--device=/dev/infiniband/uverbs0", "--device=/dev/infiniband/rdma_cm"]
@@ -31,13 +31,11 @@ class Container(object):
 
         self.__image = kwargs.pop("image")
 
-        if "detach" in kwargs.keys():
+        if kwargs['interactive'] is False:
             self.__type = self.__detach_flag
-            kwargs.pop("detach")
-        elif "interactive" in kwargs.keys():
-            kwargs.pop("interactive")
+        else:
             self.__type = self.__interactive_flag
-
+        kwargs.pop("interactive")
         for key in kwargs.keys():
             if key not in self.__available_args:
                 raise AttributeError("Incorrect parameters. "

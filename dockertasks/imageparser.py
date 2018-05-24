@@ -77,17 +77,24 @@ class ImageParser(object):
         first_pair = self.__read__('Nodes').split()[0]
         return first_pair.split('=')[0]
 
+    @property
+    def interactive(self):
+        if self.__read__("Redirections", "interactive").strip() == "yes":
+            return True
+        else:
+            return False
+
 
 if __name__ == '__main__':
-    a = ImageParser()
+    a = ImageParser("../started.img")
     print(a.nodes)
     # print(a.group)
     # print(a.task_name)
     # print(a.user)
     # print(a.docker_image)
     # print(a.docker_image_file)
-    # print(a.docker_command)
-    print(a.get_cont_by_hostname())
+    print(a.interactive)
+    print(a.get_cont_by_hostname("node2"))
 
     # read = run(["find \\\n / \\\n | \\\n grep confread"], stdout=PIPE, stderr=PIPE, universal_newlines=True)
     # print(read.stdout)

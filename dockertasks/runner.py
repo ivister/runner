@@ -110,7 +110,7 @@ def run_image():
     task_image = ImageParser(filename)
 
     container = Container(volumes=DEFAULT_VOLUMES,
-                          detach=True,
+                          interactive=False,
                           name=CONT_NAME_PAT % (hostname, task_image.task_name),
                           net=task_image.task_name,
                           user=USER_DOCK_PAT % (task_image.user, task_image.group),
@@ -153,5 +153,5 @@ def main():
 
 
 if __name__ == '__main__':
-    create_hostsfile()
-    #run_image()
+    # create_hostsfile()
+    run_image()
