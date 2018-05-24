@@ -25,6 +25,8 @@ locals=()
         mpich_args=''
         term_signal=''
         term_time=0
+        docker_image=''
+        docker_command=''
 	globus_id=
         rcode_flag=
         machine_file=
@@ -224,7 +226,11 @@ mpirun [mpirun_options...] <progname> [options...]
     -ppn <# of processes>
     	   number of  processes on every node
     -local var=value 
-            Use config param "var" on prepare  node for running task	   
+            Use config param "var" on prepare  node for running task
+    -dockerimage <file>
+            File with packed docker image (from docker save command)
+    -dockercommand <command>
+            Command that will execute then task will start
 
 On exit, mpirun returns a status of zero unless mpirun detected a problem, in
 which case it returns a non-zero status.

@@ -227,6 +227,17 @@ echo \$exitstatus >\$exitstatus_file
 exit \$exitstatus
 
 EOF
+
+if [ -z "$docker_image" ] && [ -z "$docker_command" ] ; then
+cat <<EOF >> $imagefile
+
+[Docker]
+docker_image_file=`RelToAbs $docker_image`
+docker_command='"'$docker_command'"'
+
+EOF
+fi
+
 exitstatus=0
 
 if [ -z "$passport_flag" ] ; then
