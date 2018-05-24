@@ -1,0 +1,216 @@
+#! /bin/sh
+# $Id: mpirun,v 2.2 2052/11/19 15:25:07 maximh Exp $
+# $Log: mpirun,v $
+# Revision 2.2  2052/11/19 15:25:07  maximh
+# error in mpirun path
+#
+# Revision 2.1  2052/11/19 14:37:49  maximh
+# init production realise
+#
+
+RelToAbs () {
+    for RelPath
+    do
+        Dir=`dirname "$RelPath"`
+        Dir=`cd $Dir; pwd`
+        # Work around for SOLARIS 2.5 ksh93 bug ("cd" prints new directory)
+        Dir=`echo "$Dir" | sed q`
+        case "$RelPath" in
+            */) Base=`basename \`echo "$RelPath"\` | sed 's:/[/]*$::'`;;
+            *)  Base=`basename "$RelPath"`;;
+        esac
+        echo "$Dir/$Base"
+    done
+}
+
+commandfile=`type -p  $0`
+rundir=`dirname $commandfile`
+
+exitstatus=1
+
+debug=
+
+MPIR_HOME=${MPIR_HOME:-/opt/hpmpi}
+MPIRUN_CMD=${MPIRUN_CMD:-$rundir/run-hpmpi-ib}
+RUNMVSDIR=/common/runmvs/bin
+CPU_MULT=8
+
+. $rundir/mpirun.args
+#
+# Build a suitable command for the whole thing
+#
+curdir=$PWD
+taskname=`basename $progname`
+imagefile=${taskname}.img
+
+if [ x$tview_flag = x1  ] ; then
+   interactive_flag=1
+   tview_flag="-totalview"
+else
+   tview_flag=""
+fi
+
+if [ x$interactive_flag = x1 ] ; then interactive_flag=yes ;  fi
+#EnvCommandLine="$EnvCommandLine PATH=$PATH"
+cpu_count=$(( ($np+$CPU_MULT-1)/$CPU_MULT *$CPU_MULT )) 
+maxnode=$(( ($np+$CPU_MULT-1)/$CPU_MULT ))
+
+if [  "$machine_file" ] ;then
+ 
+  . $rundir/checkmachinefile $machine_file
+  let cpu_count=$maxnode*$CPU_MULT
+fi
+
+
+cat <<EOF > $imagefile
+
+# Это комментарий
+# Следующая строка - название секции
+[General]
+# Далее идет содержимое секции
+# Следующая срока определяет имя задачи
+task_name = $taskname
+# Следующая срока определяет имя каталога
+# стандартного ввода/вывода
+host_directory = `RelToAbs $stdio_dir`
+# Следующая срока определяет необходимое число
+# процессоров для выполнения задачи
+# Если указывается значение any, то число процессоров
+# должно быть определено при старте задачи
+#cpu_count = $np
+really_cpu = $cpu_count
+cpu_count = $cpu_count
+# Следующая строка - название секции
+# Секция не обязательная
+[TimeRequest]
+# Время (по максимуму), необходимое для выполнения задачи,
+# указывается в минутах
+limit = $max_time
+# количество повторов задачи
+#repeat_times = $repeat_times
+# значение кванта, указывается в минутах
+# если указать 0, то квант игнорируется (задача не фоновая)
+quant = $quantum_time
+
+#
+term_time=$term_time
+term_signal=$term_signal
+
+[Redirections]
+stdin=`RelToAbs $stdin_file`
+stdout=`RelToAbs $stdout_file`
+stderr=`RelToAbs $stderr_file`
+interactive=$interactive_flag
+[Globus_Conf]
+globus_id=$globus_id
+EOF
+if [ -z "$resource_file" -a -n "${resources[*]}" ] ; then
+(
+   echo '[UserNodes]'
+
+   for i in `seq 1 $maxnode` ; do
+     echo node$i=$CPU_MULT
+   done
+
+   echo '[DefaultResource]'
+
+
+    for resource in "${resources[@]}" ; do
+       echo "$resource"
+    done
+
+    echo '[Resources]'
+    for i in `seq 1 $maxnode` ; do
+      echo node$i='[DefaultResource]'
+    done
+) >>$imagefile
+
+fi
+
+
+
+if [ -n "$resource_file"  ] ; then
+    cat $resource_file>>$imagefile
+fi
+if [ -n "$resource_file" -a -n "${resources[*]}" ] ; then
+ echo 1>&2 "You can not use both -resource and -resourcefile"
+fi
+
+echo '[Batch]' >>$imagefile
+
+echo "#!/bin/bash" >> $imagefile
+export >> $imagefile
+
+(
+echo "EnvCommandLine=("
+for env in "${EnvCommandLine[@]}"  ; do echo  \""$env"\"   ; done
+echo ")"
+)>> $imagefile
+
+
+
+
+cat <<EOF >> $imagefile
+
+num_nodes=$maxnode
+hosts_list="\$2"
+exitstatus_file="\$3"
+prefix="\$4"
+np=$np
+tview_flag=$tview_flag
+progname="\$4 $progname"
+mpich_args="$mpich_args"
+cmdLineArgs="$cmdLineArgs"
+width_distribution=$width_distribution
+numofnodes=$maxnode
+MPIRUN_HOME=${MPIRUN_HOME:-$MPIR_HOME/bin}
+cd "$curdir"
+tmpname=\`mktemp machines.XXXXXX\` || exit 1
+
+if [  "$machine_file" ] ;then
+  $rundir/genmachinefile "\$hosts_list" $machine_file >\$tmpname
+  hosts_list=\$tmpname
+fi
+
+EnvCommandLine=(  "\${EnvCommandLine[@]}" MACHINEFILE_NAME=\$hosts_list ) 
+    export LMUTIL=lmutil
+
+
+if [ x$tview_flag = x-totalview ]
+then
+    if ! check_license -c /common/totalview/license.dat -f TV/Base
+    then
+        sleep 1
+        echo 215 >\$exitstatus_file
+        exit 215
+    fi
+fi
+
+
+#$MPIRUN_HOME/mpirun.ch_gm --gm-np \$num_nodes --gm-f \$tmpname --gm-kill 5 $tview_flag $progname $cmdLineArgs
+#$MPIRUN_HOME/mpirun.ch_gm -pg  \$tmpname $mpich_args "PATH=$PATH" $tview_flag $progname $cmdLineArgs
+#$MPIRUN_CMD  -np $np -hostfile \$tmpname $tview_flag $progname $cmdLineArgs
+. $MPIRUN_CMD 
+exitstatus=\$?
+#echo exitatus=\$exitstatus
+
+if [ $restart_flag -ne 0 ] ; then
+    exitstatus=215
+fi
+
+rm \$tmpname
+echo \$exitstatus >\$exitstatus_file
+exit \$exitstatus
+EOF
+ if [ x$wait_flag != x1  ] ; then
+    $RUNMVSDIR/runmvs  -rf "$imagefile" $subsystem_parametr  $controlhost_parametr $rcode_flag
+
+ else
+    result_task_name=`$RUNMVSDIR/runmvs -fo -rf "$imagefile" $subsystem_parametr  $controlhost_parametr`
+    if [ x$result_task_name != x  ] ; then
+       $RUNMVSDIR/runmvs -wait $result_task_name
+    fi
+ fi
+
+
+# $debug rm $imagefile

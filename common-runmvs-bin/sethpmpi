@@ -1,0 +1,4 @@
+export PATH=/common/runmvs/bin:/opt/hpmpi/bin:$PATH
+export MPIRUN_CMD=/common/runmvs/bin/run-hpmpi-ib
+export MPIRUN_HOME=/opt/hpmpi/bin
+

@@ -1,0 +1,438 @@
+#! /bin/sh
+progname=
+hasprinthelp=1
+np=1
+cmdLineArgs=
+mpirun_verbose=0
+just_testing=0
+Show=eval
+EnvCommandLine=()
+resources=()
+locals=()
+
+#       repeat_times=1
+#       quantum_time=0
+#       max_time=10
+#       stdio_dir=`pwd`
+        subsystem_parametr=''
+        controlhost_parametr=''
+        width_distribution=0
+        stdin_file=''
+        stdout_file=''
+        stderr_file=''
+#       trasformation_script=$rundir/p4topg.sh
+#       restart_flag=0
+        mpich_args=''
+        term_signal=''
+        term_time=0
+	globus_id=
+        rcode_flag=
+        machine_file=
+        resource_file=
+        resource=
+	local=
+        proc_per_node=
+
+confread="/common/runmvs/bin/confread"
+conffile="$HOME/.crunmvs"
+
+quantum_time=`$confread $conffile Mpirun quantum`
+if [ $? != 0 ]; then
+ quantum_time=0
+fi
+
+max_time=`$confread $conffile Mpirun maxtime`
+if [ $? != 0 ]; then
+ max_time=10
+fi
+
+eval stdio_dir=`$confread $conffile Mpirun stdiodir`
+if [  -z $stdio_dir ]; then
+ stdio_dir=`pwd`
+fi
+
+transformation_script=`$confread $conffile Mpirun transform`
+if [ $? != 0 ]; then
+        transformation_script=$rundir/mf.sh
+fi
+
+
+
+restart_flag=`$confread $conffile Mpirun restart`
+if [ $? != 0 ]; then
+       restart_flag=0
+fi
+
+interactive_flag=`$confread $conffile Mpirun interactive`
+if [ $? != 0 ]; then
+       interactive_flag=0
+fi
+
+term_time=`$confread $conffile Mpirun term_time`
+if [ $? != 0 ]; then
+       term_time=0
+fi
+
+term_time=`$confread $conffile Mpirun term_signal`
+if [ $? != 0 ]; then
+       term_signal=''
+fi
+if [ "$term_time" == ' ' ] ; then term_time='' ; fi
+
+
+machine_file=`$confread $conffile Mpirun machine_file`
+if [ $? != 0 ]; then
+       machine_file=''
+fi
+if [ "$machine_file" == ' ' ] ; then machine_file='' ; fi
+
+resource_file=`$confread $conffile Mpirun resource_file`
+if [ $? != 0 ]; then
+       resource_file=''
+fi
+if [ "$resource_file" == ' ' ] ; then resource_file='' ; fi
+
+for resource in `$confread $conffile Mpirun resources` ; do
+   resources=(  "${resources[@]}" "$resource" )
+done
+
+for local in  `$confread $conffile Locals 2>/dev/null` ;do
+#   if [ "$local" == ' ' ] ; then local='' ; fi
+   locals=(  "${locals[@]}" "$local" )
+done
+
+proc_per_node=`$confread $conffile Mpirun proc_per_node 2>/dev/null`
+if [ $? != 0 ]; then
+       proc_per_node=
+fi
+
+if [ "$proc_per_node" == ' ' ]; then
+       proc_per_node=
+fi
+ 
+
+
+#mpich_args=`$confread $conffile Mpirun mpich_args`
+#if [ $? != 0 ]; then
+#       mpich_args=''
+#fi
+
+
+tview_flag=`$confread $conffile Mpirun totalview`
+if [ $? != 0 ]; then
+       tview_flag=0
+fi
+
+if [ x$tview_flag = x"y" ] ; then
+     tview_flag=1
+fi
+
+if [ x$tview_flag = x"yes" ] ; then
+     tview_flag=1
+fi
+
+if [ x$tview_flag = x"true" ] ; then
+     tview_flag=1
+fi
+
+wait_flag=`$confread $conffile Mpirun totalview`
+if [ $? != 0 ]; then
+       wait_flag=0
+fi
+
+if [ x$wait_flag = x"y" ] ; then
+     wait_flag=1
+fi
+
+if [ x$wait_flag = x"yes" ] ; then
+     wait_flag=1
+fi
+
+if [ x$wait_flag = x"true" ] ; then
+     wait_flag=1
+fi
+
+
+
+
+
+PrintHelp() {
+#
+# If you change this, make the corresponding changes in README so that
+# the man pages are updated.
+#
+
+#    -width
+#           Use alternative order of tasks numbers in MPI_COMMON_WORLD
+#    -transform  <command>
+#           Use command for translate nodes list to config file for gm.
+
+cat <<EOF
+
+
+mpirun [mpirun_options...] <progname> [options...]
+  mpirun_options:
+    -h      This help
+    -np <np>
+            specify the number of processors to run on
+    -t      Testing - do not actually run, just print what would be
+            executed
+    -v      Verbose - throw in some comments
+    -maxtime <mins>
+            Maximum job run time in minutes.
+            Default value is $max_time minutes.
+    -quantum <time>
+           quantum time in minutes for background task.
+           Default value is no background task (0).
+    -stdiodir <directory>
+           directory for stdinput/stdoutput files of running task.
+           Default value is current directoty.
+    -s  <system_name>
+           Name of used logical subsystem
+    -host <host_name>
+           Host name of control computer
+#    -width
+#           Use alternative order of tasks numbers in MPI_COMMON_WORLD
+#    -transform  <command>
+#          Use command for translate nodes list to config file for gm.
+    -stdin <file>
+           Use file as stdin
+    -stdout <file>
+           Use file as stdout
+    -stderr <file>
+           Use file as stderr
+    -termtime <time>
+           Advanced time in minutess for save data from program to disk added to maxtime.
+    -termsignal <signal>
+           Signal for task on each module whan time become exhausted
+    -wait
+           Wait for program ending
+    -restart
+           Put task into queue after his ending
+    -interactive
+           Run task in interactive mode
+    -tv
+           Use totalview debuger
+    -rcode
+           Use exit code to form task name
+    -machinefile <machinefile pattern>
+           Use file as machinefile pattern
+    -resourcefile <file>
+           Use file as resource definition file 
+    -resource "string"
+            Use string as resource for all nodes. You can use   -resource params several times in command line.
+    -ppn <# of processes>
+    	   number of  processes on every node
+    -local var=value 
+            Use config param "var" on prepare  node for running task	   
+
+On exit, mpirun returns a status of zero unless mpirun detected a problem, in
+which case it returns a non-zero status.
+EOF
+}
+
+#    -xdbx   Start the first process under xdbx where possible
+while [ 1 -le $# ] ; do
+  arg=$1
+  #echo $arg
+  #echo $#
+  shift
+  case $arg in
+    -np)
+        np="$1"
+        nodigits=`echo $np | sed 's/^[0-9]*$//'`
+        if [ "$nodigits" != "" -o $np -lt 1 ] ; then
+           echo np: $np is an invalid number of processors.  Exiting.
+           exit 1
+        fi
+        eval np$narch=$1
+        shift
+        ;;
+    -h)
+        if [ "$hasprinthelp" = 1 ] ; then
+           PrintHelp
+        fi
+        exit 1
+        ;;
+    -v)
+        mpirun_verbose=1
+        ;;
+    -width)
+        width_distribution=1
+        transformation_script=$rundir/mfr.sh
+        ;;
+    -transform)
+        transformation_script="$1"
+        shift
+        ;;
+    -t)
+        just_testing=1
+        Show=echo
+        ;;
+    -maxtime|-cpu)
+        max_time="$1"
+        shift
+        ;;
+    -termtime)
+        term_time="$1"
+        shift
+        ;;
+    -termsignal)
+        term_signal="$1"
+        shift
+        ;;
+
+    -echo)
+        # this is for debugging
+        set -x
+        ;;
+    -usage|-help|-\?)
+        # Accept these for help until the program name is provided.
+        if [ "$progname" = "" ] ; then
+           if [ "$hasprinthelp" = "1" ] ; then
+              PrintHelp
+           fi
+           exit 1
+        fi
+        ;;
+    -repeat )
+        repeat_times="$1"
+        shift
+    ;;
+    -quantum  )
+        quantum_time="$1"
+        shift
+    ;;
+    -stdiodir  )
+        stdio_dir="$1"
+        shift
+    ;;
+    -mpichargs  )
+        mpich_args="$1"
+        shift
+    ;;
+
+    -s  )
+        subsystem_parametr="-s $1"
+        shift
+    ;;
+    -host  )
+        controlhost_parametr="-host $1"
+        shift
+    ;;
+    -stdin  )
+        stdin_file=$1
+        shift
+    ;;
+    -stdout  )
+        stdout_file=$1
+        shift
+    ;;
+    -stderr  )
+        stderr_file=$1
+        shift
+    ;;
+    -machinefile  )
+        machine_file=$1
+        shift
+    ;;
+    -resourcefile  )
+        resource_file=$1
+        shift
+    ;;
+    -resource  )
+        resources=(   "${resources[@]}" "$1" ) 
+        shift
+    ;;
+    -restart )
+        restart_flag=1
+    ;;
+    -passport )
+        passport_flag=1
+    ;;
+
+    -interactive | -interact | -i )
+        interactive_flag=1
+
+    ;;
+    -tv | -totalview )
+        tview_flag=1
+    ;;
+    -wait )
+        wait_flag=1
+    ;;
+    -globus_id )
+        globus_id=$1
+	shift
+    ;;
+    -rcode )
+        rcode_flag="-rcode"
+    ;;
+    -ppn  )
+        proc_per_node=$1
+        shift
+    ;;
+    -local  )
+        locals=(   "${locals[@]}" "$1" ) 
+        shift
+    ;;
+
+
+    -*  )
+        # Accept these for help until the program name is provided.
+        if [ "$progname" = "" ] ; then
+           echo Unknown arg $arg
+           if [ "$hasprinthelp" = "1" ] ; then
+              PrintHelp
+           fi
+           exit 1
+        else
+           cmdLineArgs="$cmdLineArgs $arg"
+        fi
+    ;;
+    *=* )
+        if [ "$progname" = "" ] ; then
+               EnvCommandLine=(  "${EnvCommandLine[@]}" "$arg" )
+        else
+           cmdLineArgs="$cmdLineArgs $arg"
+        fi
+
+         ;;
+    *)
+            progname="$arg"
+
+            while [ 1 -le $# ] ; do
+               cmdLineArgs="$cmdLineArgs $1"
+               shift
+
+            done
+      ;;
+  esac
+done
+# We need at least the program name
+
+if [  -z "$progname"  ] ; then
+  echo "Missing: program name"
+  exit 1
+fi
+
+if ! [  -x "$progname" ] ; then
+      echo "Program $progname either does not exist, is not "
+      echo "executable, or is an erroneous argument to mpirun."
+  exit 1
+fi
+    PWD=`pwd`
+tail=`echo $progname | sed 's/\/.*//'`
+if  [ "$tail" = "" ] ; then
+  #echo Absolute path, don't need to change anything
+  true
+else
+  #echo Relative path
+  progname="$PWD/$progname"
+fi
+
+#    -repeat <count>
+#           Task run will be repeated <count> times.
+#           Default value is $repeat_times.
+#    -mpichargs <mpich_args>
+#           Argument of this parameter used for GM options of starting task

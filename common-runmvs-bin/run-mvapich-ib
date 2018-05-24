@@ -1,0 +1,14 @@
+#!
+EnvArg=
+for env in "${EnvCommandLine[@]}"  ; do
+   EnvArg="$EnvArg  $env"
+done
+#export MPI_PIN_PERCENTAGE=${MPI_PIN_PERCENTAGE:-30}
+
+tempname=`mktemp machines.XXXXXX` || exit 1 
+tohostslist "$hosts_list"  >$tempname
+$MPIRUN_HOME/mpirun_rsh  -np $np -hostfile $tempname  $EnvArg   $progname $cmdLineArgs
+
+rm -f $tempname
+
+

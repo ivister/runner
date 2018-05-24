@@ -1,0 +1,22 @@
+EnvArg=                                                                                                                                        
+for env in "${EnvCommandLine[@]}"  ; do
+   var=${env%%=*}
+   val=${env#*=}
+   EnvArg="$EnvArg -genv $var $val"                                                                                                               
+done   
+
+mpdconfdir=`pwd`
+if ! [ -w "$mpdconfdir" ] ; then mpdconfdir=$HOME ; fi
+if ! [ -w "$mpdconfdir" ] ; then mpdconfdir=~ ; fi
+ 
+mpdconffile=`mktemp $mpdconfdir/mpdconfXXXXXX`
+trap 'rm $mpdconffile ; exit 1' 0 1 2 15
+echo "secretword=$RANDOM" >$mpdconffile
+chmod 400 $mpdconffile 
+export I_MPI_MPD_CONF=$mpdconffile
+
+export I_MPI_DEVICE=${I_MPI_DEVICE:-rdssm}
+export I_MPI_FALLBACK_DEVICE=${I_MPI_FALLBACK_DEVICE:-disable}
+#export I_MPI_DAT_LIBRARY=${I_MPI_DAT_LIBRARY:-/usr/voltaire/lib/libdat.so}
+$MPIRUN_HOME/mpdboot  -f $hosts_list -o --rsh=ssh  
+$MPIRUN_HOME/mpiexec   $EnvArg -n $np  $progname $cmdLineArgs

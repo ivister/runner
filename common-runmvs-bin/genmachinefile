@@ -1,0 +1,52 @@
+process_node(){
+pattern=$1
+nodenum=$2
+if [ $nodenum  -eq 0 ] ; then
+    echo >&2 "Incorrect $machinefile($lineno): \"$line\" - node number must not be zero"
+    error=1
+    return 1
+fi    
+
+if [ -n "${nodes[$nodenum]}" ] ; then
+    echo $line | sed "s/$pattern/${nodes[$nodenum]}/"
+    return 0
+fi
+ 
+return 1
+
+}
+    
+
+machinefile=$1
+# patternfile is external
+patternfile=$2
+lineno=0
+error=0
+declare -a nodes
+unset nodes   
+maxnode=0
+
+while read line ; do 
+   let lineno++
+   eval `echo $line | sed 's/^\s*\([^:]*\):[0-9]*\s*$/nodes[$lineno]=\1/'`
+done <$machinefile
+lineno=0
+feof=0
+while [ $feof -eq 0 ] ; do 
+   let lineno++
+   if ! read line ; then feof=1 ;fi
+   line=`echo $line | sed 's/[#;].*$//' `   #  Process comments
+   if [[ "$line" =~ ^\s*$ ]] ; then continue ; fi # Process empty lines
+   if [[ $line =~ ^\s*node0*[0-9]+:0*[0-9]+\s*$ ]] ; then    
+        eval `echo $line | sed 's/^\s*\(node0*\([0-9][0-9]*\)\):0*[0-9][0-9]*\s*$/process_node  \1 \2/'`
+#                                                                           \1 - imya uzla \2 nomer uzla
+	continue
+   fi
+   if [[ $line =~ ^\s*node[0-9]+\s*$ ]] ; then
+        eval `echo $line | sed 's/^\s*\(node0*\([0-9][0-9]*\)\)\s*$/process_node  \1 \2/'`
+	continue
+   fi
+   echo "Incorrect $machinefile($lineno): \"$line\" - syntax error" >&2
+   error=1
+   continue     
+done <"$patternfile"

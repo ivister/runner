@@ -1,0 +1,4 @@
+export PATH=/common/runmvs/bin:/common/mvapich/bin:$PATH
+export MPIRUN_CMD=/common/runmvs/bin/run-mvapich-ib
+export MPIRUN_HOME=/common/mvapich/bin
+

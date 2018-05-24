@@ -1,0 +1,9 @@
+EnvArg=                                                                                                                                        
+for env in "${EnvCommandLine[@]}"  ; do
+   EnvArg="$EnvArg -e $env"                                                                                                               
+done   
+EnvArg="$EnvArg -e MPI_PIN_PERCENTAGE=30"
+#export MPI_PIN_PERCENTAGE=${MPI_PIN_PERCENTAGE:-30}
+lprefix=/common/runmvs/bin/setrlimit
+$MPIRUN_HOME/mpirun  -np $np -hostfile $hosts_list  $EnvArg  $lprefix $progname $cmdLineArgs
+

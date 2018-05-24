@@ -1,0 +1,80 @@
+process_node(){
+nodenum=$1
+nprocs=$2
+if [ $nodenum  -eq 0 ] ; then
+    echo >&2 "Incorrect $machine_file($lineno): \"$line\" - node number must not be zero"
+    error=1
+    return 1
+fi    
+
+if [ $nprocs  -eq 0 ] ; then
+    echo >&2 "Incorrect $machine_file($lineno): \"$line\" -  number of processes must not be zero"
+    error=1
+    return 1    
+fi 
+
+if [ $procsum -lt $np ] ; then
+   let  procsum+=$nprocs
+   if [ $nodenum -gt $maxnode ] ; then maxnode=$nodenum ;fi
+   let nodes[$nodenum]=$nprocs
+fi
+
+return 0;
+
+}
+    
+
+#machine_file=bb1
+lineno=0
+error=0
+procsum=0
+declare -a nodes
+unset nodes   
+
+
+maxnode=0
+if ! [ -f "$machine_file" -a -r "$machine_file" ] ; then
+   echo >&2 Can\'t read machine file "\"$machine_file\""
+   echo Job is not queued >&2
+   exit 1
+fi
+feof=0
+while [ $feof -eq 0 ]  ; do 
+   if ! read line ; then feof=1 ;fi
+   let lineno++
+   line=`echo $line | sed 's/[#;].*$//' `   #  Process comments
+   if [[ "$line" =~ ^\s*$ ]] ; then continue ; fi # Process empty lines
+   if [[ $line =~ ^\s*node0*[0-9]+:0*[0-9]+\s*$ ]] ; then    
+        eval `echo $line | sed 's/^\s*node0*\([0-9][0-9]*\):0*\([0-9][0-9]*\)\s*$/process_node \1 \2/'`
+	continue
+   fi
+   if [[ $line =~ ^\s*node[0-9]+\s*$ ]] ; then
+        eval `echo $line | sed 's/^\s*node0*\([0-9][0-9]*\)\s*$/process_node \1 1/'`
+	continue
+   fi
+   echo "Incorrect $machine_file($lineno): \"$line\" - syntax error" >&2
+   error=1
+   continue    
+      
+done <"$machine_file"
+if [ $procsum -lt $np ]; then
+   echo There are  not enough processors in machinefile: It is found $procsum processors,  need $np processors.
+   error=1
+
+fi
+
+for (( i=1; i<=$maxnode; i++ )) ;do 
+   if [ -z "${nodes[$i]}" ] ; then
+      echo node$i was skipped >&2
+      nodes[$i]=0
+      error=1
+   fi
+done
+
+
+#echo np=$np      
+      
+if [ $error -ne 0 ] ; then 
+   echo Job is not queued >&2
+   exit 1
+fi 
