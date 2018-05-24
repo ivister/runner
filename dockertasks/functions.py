@@ -1,16 +1,11 @@
 """
 """
-from dockertasks.default import DEFAULT_CPU_PER_NODE
+from dockertasks.patterns import HOSTNAME_DOCK_PAT, HOSTSFILE_PAT
 import shutil
 import pwd
 import os
 import sys
 from subprocess import run, PIPE
-
-
-def get_remote_name(task_id):
-    prefix = ""
-    return prefix + task_id + ".tar"
 
 
 def dict_to_string(in_dict):
@@ -40,26 +35,10 @@ def volumes_to_list(vol_string):
 
 def dot_to_underscore(dot_text):
     return "-".join(dot_text.split("."))
-    image_name = get_image_name(load.stdout)
-
-    if hostname == task_image.first_host:
-        task_image.write("Docker", "docker_image", image_name)
 
 
 def add_dot_txt(filename):
     return filename + ".txt"
-
-
-def calculate_cpus(machines, cpu_need, cpu_per_node=DEFAULT_CPU_PER_NODE):
-    set_node_cpu = cpu_per_node
-    last_node_cpu = cpu_need - (len(machines) - 1) * cpu_per_node
-    # print(set_node_cpu)
-    # print(last_node_cpu)
-    return set_node_cpu, last_node_cpu
-
-
-def get_username_from_pair(pair):
-    return pair.split(":")[0]
 
 
 def add_hostfile_to_command(command, hostfile_name="hostfile.txt"):
@@ -71,25 +50,29 @@ def add_hostfile_to_command(command, hostfile_name="hostfile.txt"):
         return " ".join(tmp)
 
 
-def generate_hosts_line(nodes, task_id):
-    tmp = ["%s.%s" % (key, task_id) for key in nodes.keys()]
-    return "\n".join(tmp)
+def generate_hosts_list(nodes, task_id):
+    """
+    :param nodes:
+    :param task_id:
+    :return:
+    """
+    keys = [key for key in nodes.keys()]
+    hostnames = [HOSTNAME_DOCK_PAT % (task_id, key, task_id) for key in keys]
+    return keys, hostnames
 
 
-def write_hosts_to_file(hosts_line, filename):
+def write_hosts_to_file(hosts_list, filename):
     with open(filename, "w") as fil:
-        fil.write(hosts_line)
+        fil.write("\n".join(hosts_list))
     return filename
 
 
-def move_hostfile_to_userhome(nodes, task_id, user):
-    # cmd_pattern = """sudo su %s -c "cp %s ~/" """
-    filename = "%s_%s" % (task_id, "hostfile")
-    hosts = generate_hosts_line(nodes=nodes, task_id=task_id)
-    write_hosts_to_file(hosts_line=hosts, filename=filename)
+def make_hostsfile(hosts_list, task_id, user):
     homedir = pwd.getpwnam(user)[5] + "/"
-    # uid = pwd.getpwnam(user)[2]
-    # gid = pwd.getpwnam(user)[3]
+    filename = homedir + HOSTSFILE_PAT % (task_id, "hostfile")
+    with open(filename, "w") as fil:
+        fil.write("\n".join(hosts_list))
+
     os.chmod(filename, 0o666)
     shutil.copy(filename, homedir)
     os.remove(filename)

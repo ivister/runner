@@ -19,8 +19,8 @@ cpu_count = 8
 home_number = 
 system = default
 run_number = 2
-user = pyworker
-group = pyworker
+user = ivan
+group = users
 job_id = 474
 task_directory = /common/runmvs/tasks/pyworker.sleep600.sh.2
 restore_mode = no
@@ -138,6 +138,7 @@ start_time =
 [Nodes]
 node1193=8
 node1182=4
+node2=3
 
 [Docker]
 docker_image_file=/home/ivan/mvapich.tar
@@ -145,5 +146,6 @@ docker_image=ivister/mvapich:latest
 docker_command="mpirun -np 5 --hostfile /home/ivan/hst ./hw 1> ~/out 2> ~/err"
 
 [Containers]
-node1193=node1193-474
-node1182=node1182-474
+node1193 = 474-node1193.474
+node1182 = 474-node1182.474
+node2 = 474-node2.474

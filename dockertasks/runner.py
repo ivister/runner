@@ -1,31 +1,28 @@
 """
 """
-import sys
+import socket
 import argparse
-from subprocess import run, PIPE
 import paramiko
 from dockertasks.network import EthernetNetwork
 from dockertasks.container import Container
 from dockertasks.default import DEFAULT_VOLUMES
-from dockertasks.functions import get_remote_name
-from dockertasks.functions import move_hostfile_to_userhome
+from dockertasks.patterns import CONT_NAME_PAT, USER_DOCK_PAT
+from dockertasks.functions import make_hostsfile
 from dockertasks.imageparser import ImageParser
-from dockertasks.functions import exec_local
+from dockertasks.functions import exec_local, generate_hosts_list
 
 
 DEBUG_MODE = True
 
 
-def get_filename_hostname():
+def get_filename():
     """
     :return:
     """
     parser = argparse.ArgumentParser(description="Get file")
     parser.add_argument('-f', '--file', dest='filename',
                         action='store', required=True)
-    parser.add_argument('-n', '--node', dest='hostname',
-                        action='store', required=False)
-    return parser.parse_args().filename, parser.parse_args().hostname
+    return parser.parse_args().filename
 
 
 def get_image_name(data):
@@ -49,7 +46,8 @@ def load_image():
     :return:
     """
 
-    imagefile, hostname = get_filename_hostname()
+    imagefile = get_filename()
+    hostname = socket.gethostname()
 
     task_image = ImageParser(imagefile)
     load_command = get_load_command(task_image.docker_image_file)
@@ -67,7 +65,7 @@ def create_network():
     """
     :return:
     """
-    filename, _ = get_filename_hostname()
+    filename = get_filename()
     task_image = ImageParser(filename)
 
     client = paramiko.SSHClient()
@@ -91,25 +89,29 @@ def create_network():
 
 
 def create_hostsfile():
-    filename, _ = get_filename_hostname()
+    filename = get_filename()
     task_image = ImageParser(filename)
-    hf_name = move_hostfile_to_userhome(nodes=task_image.nodes,
-                                        task_id=task_image.task_name,
-                                        user=task_image.user)
+    real_hosts, virt_hosts = generate_hosts_list(nodes=task_image.nodes, task_id=task_image.task_name)
+    for index, hst in enumerate(real_hosts):
+        task_image.write(section="Containers", param=hst, value=virt_hosts[index])
+    hf_name = make_hostsfile(hosts_list=virt_hosts,
+                             task_id=task_image.task_name,
+                             user=task_image.user)
     task_image.write("Docker", "hostsfile", hf_name)
     return 0
 
 
 def run_image():
 
-    filename, hostname = get_filename_hostname()
+    filename = get_filename()
+    hostname = socket.gethostname()
     task_image = ImageParser(filename)
 
     container = Container(volumes=DEFAULT_VOLUMES,
                           detach=True,
-                          name="%s-%s" % (hostname, task_image.task_name),
+                          name=CONT_NAME_PAT % (hostname, task_image.task_name),
                           net=task_image.task_name,
-                          user="%s:%s" % (task_image.user, task_image.group),
+                          user=USER_DOCK_PAT % (task_image.user, task_image.group),
                           cpus=task_image.nodes[hostname],
                           image=task_image.docker_image)
     run_command = container.run_command
@@ -149,4 +151,5 @@ def main():
 
 
 if __name__ == '__main__':
-    run_image()
+    create_hostsfile()
+    #run_image()

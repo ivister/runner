@@ -7,8 +7,8 @@ import paramiko
 from dockertasks.container import Container
 from dockertasks.network import EthernetNetwork
 from dockertasks.imageparser import ImageParser
-# from swarm import Swarm
 from dockertasks.functions import dot_to_underscore
+from dockertasks.functions import exec_local
 
 
 def get_filename():
@@ -31,19 +31,15 @@ def remove_docker_image():
     filename = get_filename()
     task_image = ImageParser(filename)
     rmi_cmd = Container.remove_image(task_image.docker_image)
+    rc, _, _ = exec_local(rmi_cmd)
+    return rc
 
 
-
-def parse_stop_file(filename):
-    """
-    :param filename:
-    :return:
-    """
-    with open(filename) as json_file:
-        data = json.load(json_file)
-    task_id = data["task_id"]
-    machines = data["machines"].split(" ")
-    return task_id, machines
+def remove_cont():
+    filename = get_filename()
+    task_image = ImageParser(filename)
+    os.ho
+    stop_cmd = Container.stop_command("%s" % task_image.task_name)
 
 
 def clean_machine(hostname, or_task_id):

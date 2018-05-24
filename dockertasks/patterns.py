@@ -1,0 +1,4 @@
+CONT_NAME_PAT = "%s-%s"
+USER_DOCK_PAT = "%s:%s"
+HOSTNAME_DOCK_PAT = CONT_NAME_PAT + ".%s"
+HOSTSFILE_PAT = "%s_%s.txt"
