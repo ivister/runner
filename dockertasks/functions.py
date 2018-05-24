@@ -91,6 +91,7 @@ def exec_local(cmd):
 
 
 if __name__ == '__main__':
+    pass
     # print(dot_to_underscore("mpi.ivan.docker.net.33"))
     # l = ['a', 'b']
     # print(l.index('a'))
@@ -102,7 +103,7 @@ if __name__ == '__main__':
     #
     # calculate_cpus(["node1", "node3"], cpu_need=3, cpu_per_node=2)
     #
-    move_hostfile_to_userhome(["node1", "node2", "node3", "node4"], "mpi_ivan_133", "ivan", "hostfile.txt")
+    #move_hostfile_to_userhome(["node1", "node2", "node3", "node4"], "mpi_ivan_133", "ivan", "hostfile.txt")
     # import pwd
     # d = pwd.getpwnam("ivan")
     # print(d)
