@@ -6,6 +6,7 @@ import argparse
 import paramiko
 from dockertasks.container import Container
 from dockertasks.network import EthernetNetwork
+from dockertasks.imageparser import ImageParser
 # from swarm import Swarm
 from dockertasks.functions import dot_to_underscore
 
@@ -18,6 +19,19 @@ def get_filename():
     parser.add_argument('-f', '--file', dest='filename',
                         action='store', required=True)
     return parser.parse_args().filename
+
+
+def remove_hostsfile():
+    filename = get_filename()
+    task_image = ImageParser(filename)
+    os.remove(task_image.docker_hostsfile)
+
+
+def remove_docker_image():
+    filename = get_filename()
+    task_image = ImageParser(filename)
+    rmi_cmd = Container.remove_image(task_image.docker_image)
+
 
 
 def parse_stop_file(filename):

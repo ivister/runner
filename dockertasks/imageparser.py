@@ -62,19 +62,28 @@ class ImageParser(object):
         return self.__read__("Docker", "docker_command").strip()
 
     @property
+    def docker_hostsfile(self):
+        return self.__read__("Docker", "hostsfile").strip()
+
+    @property
     def first_host(self):
         first_pair = self.__read__('Nodes').split()[0]
         return first_pair.split('=')[0]
 
 
 if __name__ == '__main__':
-    a = ImageParser()
-    print(a.nodes)
-    print(a.group)
-    print(a.task_name)
-    print(a.user)
-    print(a.docker_image)
-    print(a.docker_image_file)
-    print(a.docker_command)
-    print(a.first_host)
+    # a = ImageParser()
+    # print(a.nodes)
+    # print(a.group)
+    # print(a.task_name)
+    # print(a.user)
+    # print(a.docker_image)
+    # print(a.docker_image_file)
+    # print(a.docker_command)
+    # print(a.first_host)
+
+    read = run(["find \\\n / \\\n | \\\n grep confread"], stdout=PIPE, stderr=PIPE, universal_newlines=True)
+    print(read.stdout)
+    return_code = read.returncode
+
 

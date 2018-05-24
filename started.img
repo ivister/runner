@@ -143,3 +143,7 @@ node1182=4
 docker_image_file=/home/ivan/mvapich.tar
 docker_image=ivister/mvapich:latest
 docker_command="mpirun -np 5 --hostfile /home/ivan/hst ./hw 1> ~/out 2> ~/err"
+
+[Containers]
+node1193=node1193-474
+node1182=node1182-474

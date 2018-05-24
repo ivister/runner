@@ -4,6 +4,8 @@ from dockertasks.default import DEFAULT_CPU_PER_NODE
 import shutil
 import pwd
 import os
+import sys
+from subprocess import run, PIPE
 
 
 def get_remote_name(task_id):
@@ -15,22 +17,33 @@ def dict_to_string(in_dict):
     result = ""
     for key in in_dict.keys():
         if "_" in key:
-            result += ' --%s=%s' % ("-".join(key.split("_")), in_dict[key])
+            result += ' --%s=%s \\\n' % ("-".join(key.split("_")), in_dict[key])
         else:
-            result += ' --%s=%s' % (key, in_dict[key])
+            result += ' --%s=%s \\\n' % (key, in_dict[key])
     return result
 
 
-def volumes_to_string(vol_string):
-    tmp = vol_string.split(" ")
-    result = ""
-    for vol in tmp:
-        result += " --volume=%s" % vol
+def dict_to_list(in_dict):
+    result = []
+    for key in in_dict.keys():
+        if "_" in key:
+            result.append('--%s=%s' % ("-".join(key.split("_")), in_dict[key]))
+        else:
+            result.append('--%s=%s' % (key, in_dict[key]))
     return result
+
+
+def volumes_to_list(vol_string):
+    tmp = ["--volume=%s" % vol for vol in vol_string.split(" ")]
+    return tmp
 
 
 def dot_to_underscore(dot_text):
     return "-".join(dot_text.split("."))
+    image_name = get_image_name(load.stdout)
+
+    if hostname == task_image.first_host:
+        task_image.write("Docker", "docker_image", image_name)
 
 
 def add_dot_txt(filename):
@@ -82,6 +95,16 @@ def move_hostfile_to_userhome(nodes, task_id, user):
     os.remove(filename)
 
     return "%s/%s" % (homedir, filename)
+
+
+def exec_local(cmd):
+    thread = run(cmd, stdout=PIPE, stderr=PIPE, universal_newlines=True)
+    return_code = thread.returncode
+    out = thread.stdout
+    err = thread.stderr
+    if not return_code == 0:
+        sys.exit(return_code)
+    return return_code, out, err
 
 
 if __name__ == '__main__':

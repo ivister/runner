@@ -1,8 +1,8 @@
 """
 """
 
-from dockertasks.functions import volumes_to_string
-from dockertasks.functions import dict_to_string
+from dockertasks.functions import volumes_to_list
+from dockertasks.functions import dict_to_list
 
 
 class Container(object):
@@ -21,11 +21,11 @@ class Container(object):
                         "name"]
     __detach_flag = '--detach'
     __interactive_flag = '-i'
-    __security_flag = ' --security-opt=no-new-privileges'
+    __security_flag = '--security-opt=no-new-privileges'
     # TODO: check ib_devices
-    __ib_devices = " --device=/dev/infiniband/uverbs0 --device=/dev/infiniband/rdma_cm"
+    __ib_devices = ["--device=/dev/infiniband/uverbs0", "--device=/dev/infiniband/rdma_cm"]
 
-    __limits = " --ulimit memlock=-1:-1"
+    __limits = ["--ulimit memlock=-1:-1"]
 
     def __init__(self, **kwargs):
 
@@ -50,54 +50,40 @@ class Container(object):
         """
         :return:
         """
-        command = "docker run"
-        command += " %s" % self.__security_flag
+        command = ["docker", "run"]
 
-        command += self.__ib_devices
-        command += self.__limits
+        command.append("%s" % self.__type)
+        command.append("%s" % self.__security_flag)
 
-        command += " %s" % self.__type
-        command += volumes_to_string(self.__kwargs["volumes"])
-        command += " -P "
+        command.extend(self.__ib_devices)
+        command.extend(self.__limits)
+
+        command.extend(volumes_to_list(self.__kwargs["volumes"]))
         self.__kwargs.pop("volumes")
-        command += dict_to_string(self.__kwargs)
 
-        command += " %s" % self.__image
+        command.append("-P")
+        command.extend(dict_to_list(self.__kwargs))
+
+        command.append("%s" % self.__image)
         return command
 
-    @property
-    def remove_command(self):
+    @staticmethod
+    def remove_command(cont_name):
         """
         :return:
         """
-        return "docker rm %s" % self.__kwargs["name"]
+        return ["docker", "rm", cont_name]
 
-    @property
-    def stop_command(self):
+    @staticmethod
+    def stop_command(cont_name):
         """
         :return:
         """
-        return "docker stop %s" % self.__kwargs["name"]
+        return ["docker", "stop", cont_name]
 
     @staticmethod
     def print_available_kwargs():
         print(Container.__available_args)
-
-    @staticmethod
-    def remove(name):
-        """
-        :param name:
-        :return:
-        """
-        return "docker rm %s" % name
-
-    @staticmethod
-    def stop(name):
-        """
-        :param name:
-        :return:
-        """
-        return "docker stop %s" % name
 
     @staticmethod
     def exec_command(container_name, command):
@@ -114,7 +100,7 @@ class Container(object):
 
     @staticmethod
     def remove_image(image):
-        return "docker rmi %s" % image
+        return ["docker", "rmi", image]
 
 
 if __name__ == '__main__':
