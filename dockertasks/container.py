@@ -84,9 +84,10 @@ class Container(object):
         print(Container.__available_args)
 
     @staticmethod
-    def exec_command(container_name, command):
-        pattern = """docker exec -d %s sh -c "%s" """
-        return pattern % (container_name, command)
+    def exec_command(container_name, command, interactive=False):
+        run_type = "-it" if interactive else "-d"
+        pattern = ["docker", "exec", run_type, container_name, "-c", '"%s"' % command]
+        return pattern
 
     @staticmethod
     def img_from_cont(cont_name):

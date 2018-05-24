@@ -87,17 +87,18 @@ class ImageParser(object):
 
 if __name__ == '__main__':
     a = ImageParser("../started.img")
-    print(a.nodes)
+    #print(a.nodes)
     # print(a.group)
     # print(a.task_name)
     # print(a.user)
-    # print(a.docker_image)
+    print(a.docker_command)
     # print(a.docker_image_file)
-    print(a.interactive)
-    print(a.get_cont_by_hostname("node2"))
+    #print(a.interactive)
+    #print(a.get_cont_by_hostname("node2"))
 
     # read = run(["find \\\n / \\\n | \\\n grep confread"], stdout=PIPE, stderr=PIPE, universal_newlines=True)
     # print(read.stdout)
     # return_code = read.returncode
 
-
+    t = '"a"'
+    print('"%s"' % t)

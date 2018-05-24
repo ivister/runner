@@ -143,7 +143,7 @@ node2=3
 [Docker]
 docker_image_file=/home/ivan/mvapich.tar
 docker_image=ivister/mvapich:latest
-docker_command="mpirun -np 5 --hostfile /home/ivan/hst ./hw 1> ~/out 2> ~/err"
+docker_command="mpirun -np 5 ./hw"
 
 [Containers]
 node1193 = 474-node1193
