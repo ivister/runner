@@ -7,13 +7,13 @@ class ImageParser(object):
     """
     """
 
-    def __init__(self, image_file="../started.img"):
+    def __init__(self, image_file):
         if not os.path.exists(image_file):
             raise AttributeError("Incorrect image file. Image file  not exists.")
         self.config_name = image_file
 
     def __read__(self, section, param=None):
-        read_command = ["./../confread", self.config_name, section]
+        read_command = ["confread", self.config_name, section]
         if param:
             read_command.append(param)
         read = run(read_command, stdout=PIPE, stderr=PIPE, universal_newlines=True)
@@ -24,7 +24,7 @@ class ImageParser(object):
 
     def write(self, section, param, value):
 
-        write_command = ["./../confwrite", self.config_name, section, param, value]
+        write_command = ["confwrite", self.config_name, section, param, value]
         read = run(write_command, stdout=PIPE, stderr=PIPE, universal_newlines=True)
 
         return_code = read.returncode

@@ -1,0 +1,14 @@
+Metadata-Version: 1.1
+Name: dtask
+Version: 0.0.3
+Summary: Package for SUPPZ
+Home-page: http://github.com/ivister/runner
+Author: Andrey Alexeev
+Author-email: salexs95@yandex.ru
+License: UNKNOWN
+Description-Content-Type: UNKNOWN
+Description: UNKNOWN
+Keywords: docker SUPPZ
+Platform: UNKNOWN
+Classifier: Development Status :: 3 - Alpha
+Classifier: Programming Language :: Python :: 3.6

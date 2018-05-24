@@ -65,7 +65,7 @@ class EthernetNetwork(object):
         :param name:
         :return:
         """
-        return "docker network rm %s" % name
+        return ["docker", "network", "rm", name]
 
 
 if __name__ == '__main__':

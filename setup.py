@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="dtask",
-    version="0.0.2",
+    version="0.0.3",
     packages=['dockertasks'],
     description="Package for SUPPZ",
     long_description="",
@@ -28,7 +28,7 @@ setup(
              'dtask_runcont=dockertasks.runner:run_image',  # TODO runcont
              'dtask_stopcont=dockertasks.stopper:stop_cont',  # TODO stop cont
              'dtask_remcont=dockertasks.stopper:remove_cont',  # TODO remove cont
-             'dtask_remnet',  #
+             'dtask_remnet=dockertasks.stopper:remove_net',  #
              ]
     }
 )

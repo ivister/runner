@@ -59,6 +59,15 @@ def remove_cont():
     return rc
 
 
+def remove_net():
+    filename = get_filename()
+    task_image = ImageParser(filename)
+    remove_cmd = EthernetNetwork.remove(task_image.task_name)
+    print(remove_cmd)
+    _, _, _ = exec_local(remove_cmd)
+    return 0
+
+
 def clean_machine(hostname, or_task_id):
     """
     :param hostname:
@@ -96,6 +105,7 @@ def clean_machine(hostname, or_task_id):
 
 
 if __name__ == '__main__':
+    remove_net()
     remove_docker_image()
     remove_cont()
     stop_cont()
