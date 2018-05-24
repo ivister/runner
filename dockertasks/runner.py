@@ -93,7 +93,9 @@ def create_hostsfile():
     task_image = ImageParser(filename)
     real_hosts, virt_hosts = generate_hosts_list(nodes=task_image.nodes, task_id=task_image.task_name)
     for index, hst in enumerate(real_hosts):
-        task_image.write(section="Containers", param=hst, value=virt_hosts[index])
+        task_image.write(section="Containers",
+                         param=hst,
+                         value=virt_hosts[index].split('.')[0])
     hf_name = make_hostsfile(hosts_list=virt_hosts,
                              task_id=task_image.task_name,
                              user=task_image.user)

@@ -146,6 +146,6 @@ docker_image=ivister/mvapich:latest
 docker_command="mpirun -np 5 --hostfile /home/ivan/hst ./hw 1> ~/out 2> ~/err"
 
 [Containers]
-node1193 = 474-node1193.474
-node1182 = 474-node1182.474
-node2 = 474-node2.474
+node1193 = 474-node1193
+node1182 = 474-node1182
+node2 = 474-node2

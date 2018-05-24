@@ -3,6 +3,7 @@
 import json
 import os
 import argparse
+import socket
 import paramiko
 from dockertasks.container import Container
 from dockertasks.network import EthernetNetwork
@@ -31,15 +32,31 @@ def remove_docker_image():
     filename = get_filename()
     task_image = ImageParser(filename)
     rmi_cmd = Container.remove_image(task_image.docker_image)
+    print(rmi_cmd)
     rc, _, _ = exec_local(rmi_cmd)
+    return rc
+
+
+def stop_cont():
+    filename = get_filename()
+    hostname = socket.gethostname()
+    task_image = ImageParser(filename)
+    stop_cmd = Container.stop_command(
+        task_image.get_cont_by_hostname(host=hostname))
+    print(stop_cmd)
+    rc, _, _ = exec_local(stop_cmd)
     return rc
 
 
 def remove_cont():
     filename = get_filename()
+    hostname = socket.gethostname()
     task_image = ImageParser(filename)
-    os.ho
-    stop_cmd = Container.stop_command("%s" % task_image.task_name)
+    remove_cmd = Container.remove_command(
+        task_image.get_cont_by_hostname(hostname))
+    print(remove_cmd)
+    rc, _, _ = exec_local(remove_cmd)
+    return rc
 
 
 def clean_machine(hostname, or_task_id):
@@ -78,14 +95,7 @@ def clean_machine(hostname, or_task_id):
     ssh_client.close()
 
 
-def main():
-    fn = get_filename()
-    task_id, machines = parse_stop_file(fn)
-    for mach in machines:
-        clean_machine(mach, task_id)
-
-    os.remove(fn)
-
-
 if __name__ == '__main__':
-    main()
+    remove_docker_image()
+    remove_cont()
+    stop_cont()

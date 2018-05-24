@@ -31,10 +31,17 @@ class ImageParser(object):
         if not read.returncode == 0:
             sys.exit(return_code)
 
+    def get_cont_by_hostname(self, host):
+        out_list = self.__read__('Containers').strip().split("\n")
+        cont_dict = {pair.split("=")[0].strip(): pair.split("=")[1].strip()
+                     for pair in out_list}
+        return cont_dict[host]
+
     @property
     def nodes(self):
-        out_list = self.__read__('Nodes').split()
-        node_dict = {pair.split("=")[0]: pair.split("=")[1] for pair in out_list}
+        out_list = self.__read__('Nodes').strip().split('\n')
+        node_dict = {pair.split("=")[0].strip(): pair.split("=")[1].strip()
+                     for pair in out_list}
         return node_dict
 
     @property
@@ -72,18 +79,18 @@ class ImageParser(object):
 
 
 if __name__ == '__main__':
-    # a = ImageParser()
-    # print(a.nodes)
+    a = ImageParser()
+    print(a.nodes)
     # print(a.group)
     # print(a.task_name)
     # print(a.user)
     # print(a.docker_image)
     # print(a.docker_image_file)
     # print(a.docker_command)
-    # print(a.first_host)
+    print(a.get_cont_by_hostname())
 
-    read = run(["find \\\n / \\\n | \\\n grep confread"], stdout=PIPE, stderr=PIPE, universal_newlines=True)
-    print(read.stdout)
-    return_code = read.returncode
+    # read = run(["find \\\n / \\\n | \\\n grep confread"], stdout=PIPE, stderr=PIPE, universal_newlines=True)
+    # print(read.stdout)
+    # return_code = read.returncode
 
 

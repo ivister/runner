@@ -24,9 +24,10 @@ setup(
              'dtask_crnet=dockertasks.runner:create_network',  # TODO check
              'dtask_crhf=dockertasks.runner:create_hostsfile',  # TODO create hostsfile
              'dtask_remhf=dockertasks.stopper:remove_hostsfile',  # TODO remove hostfile
-             'dtask_remimage',  # TODO remove image
+             'dtask_remimage=dockertasks.stopper:remove_docker_image',  # TODO remove image
              'dtask_runcont=dockertasks.runner:run_image',  # TODO runcont
-             'dtask_stopcont',  # TODO stop cont
+             'dtask_stopcont=dockertasks.stopper:stop_cont',  # TODO stop cont
+             'dtask_remcont=dockertasks.stopper:remove_cont',  # TODO remove cont
              'dtask_remnet',  #
              ]
     }
