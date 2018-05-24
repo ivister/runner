@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(
-    name="dockertasks",
+    name="dtask",
     version="0.0.2",
     packages=['dockertasks'],
     description="Package for SUPPZ",
@@ -17,9 +17,17 @@ setup(
     install_requires=['paramiko==2.4.1'],
     entry_points={
         'console_scripts':
-            ['task_run=dockertasks.runner:main',
-             'task_stop=dockertasks.stopper:main',
-             'task_build=dockertasks.builder:main'
+            [  # 'dtask_run=dockertasks.runner:main',
+               # 'dtask_stop=dockertasks.stopper:main',
+             'dtask_build=dockertasks.builder:main',
+             'dtask_loadim=dockertasks.runner:load_image',  # TODO load image from file
+             'dtask_crnet=dockertasks.runner:create_network',  # TODO check
+             'dtask_crhf=dockertasks.runner:create_hostsfile',  # TODO create hostsfile
+             'dtask_remhf',  # TODO remove hostfile
+             'dtask_remimage',  # TODO remove image
+             'dtask_runcont',  # TODO runcont
+             'dtask_stopcont',  # TODO stop cont
+             'dtask_remnet',  #
              ]
     }
 )

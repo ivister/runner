@@ -18,12 +18,11 @@ class ImageParser(object):
             read_command.append(param)
         read = run(read_command, stdout=PIPE, stderr=PIPE, universal_newlines=True)
         return_code = read.returncode
-
         if not return_code == 0:
             sys.exit(return_code)
         return read.stdout
 
-    def __write__(self, section, param, value):
+    def write(self, section, param, value):
 
         write_command = ["./../confwrite", self.config_name, section, param, value]
         read = run(write_command, stdout=PIPE, stderr=PIPE, universal_newlines=True)
@@ -40,7 +39,7 @@ class ImageParser(object):
 
     @property
     def task_name(self):
-        return self.__read__("General", "task_name").strip()
+        return self.__read__("General", "job_id").strip()
 
     @property
     def user(self):
@@ -50,9 +49,32 @@ class ImageParser(object):
     def group(self):
         return self.__read__("General", "group").strip()
 
+    @property
+    def docker_image_file(self):
+        return self.__read__("Docker", "docker_image_file").strip()
 
-a = ImageParser()
-print(a.nodes)
-print(a.group)
-print(a.task_name)
-print(a.user)
+    @property
+    def docker_image(self):
+        return self.__read__("Docker", "docker_image").strip()
+
+    @property
+    def docker_command(self):
+        return self.__read__("Docker", "docker_command").strip()
+
+    @property
+    def first_host(self):
+        first_pair = self.__read__('Nodes').split()[0]
+        return first_pair.split('=')[0]
+
+
+if __name__ == '__main__':
+    a = ImageParser()
+    print(a.nodes)
+    print(a.group)
+    print(a.task_name)
+    print(a.user)
+    print(a.docker_image)
+    print(a.docker_image_file)
+    print(a.docker_command)
+    print(a.first_host)
+

@@ -58,10 +58,8 @@ def add_hostfile_to_command(command, hostfile_name="hostfile.txt"):
         return " ".join(tmp)
 
 
-def generate_hosts_line(machines, task_id):
-    tmp = []
-    for mach in machines:
-        tmp.append("%s.%s" % (mach, task_id))
+def generate_hosts_line(nodes, task_id):
+    tmp = ["%s.%s" % (key, task_id) for key in nodes.keys()]
     return "\n".join(tmp)
 
 
@@ -71,9 +69,10 @@ def write_hosts_to_file(hosts_line, filename):
     return filename
 
 
-def move_hostfile_to_userhome(machines, task_id, user, filename):
+def move_hostfile_to_userhome(nodes, task_id, user):
     # cmd_pattern = """sudo su %s -c "cp %s ~/" """
-    hosts = generate_hosts_line(machines=machines, task_id=task_id)
+    filename = "%s_%s" % (task_id, "hostfile")
+    hosts = generate_hosts_line(nodes=nodes, task_id=task_id)
     write_hosts_to_file(hosts_line=hosts, filename=filename)
     homedir = pwd.getpwnam(user)[5] + "/"
     # uid = pwd.getpwnam(user)[2]
@@ -81,6 +80,8 @@ def move_hostfile_to_userhome(machines, task_id, user, filename):
     os.chmod(filename, 0o666)
     shutil.copy(filename, homedir)
     os.remove(filename)
+
+    return "%s/%s" % (homedir, filename)
 
 
 if __name__ == '__main__':

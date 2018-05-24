@@ -69,8 +69,7 @@ class EthernetNetwork(object):
 
 
 if __name__ == '__main__':
-    o = EthernetNetwork(attachable=True, gateway="haha_gw",
-                        name="my_net", driver="overlay", subnet="subnet", ipam_driver="calico")
-    print(o.create_command)
-    print(o.remove_command)
-    print(EthernetNetwork.remove("my_net"))
+
+    network = EthernetNetwork(attachable=True, name=444,
+                              driver="calico", ipam_driver="calico")
+    print(network.create_command)
